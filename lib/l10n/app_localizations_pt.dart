@@ -264,6 +264,9 @@ class AppLocalizationsPt extends AppLocalizations {
   String get exportDataSubtitle => 'Salve seus dados num ficheiro JSON';
 
   @override
+  String get units => 'Unidades';
+
+  @override
   String get updateNoCompatibleApk =>
       'Não foi encontrada nenhuma atualização compatível com o seu dispositivo.';
 
@@ -750,9 +753,6 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get cannotExceedTotalCapacity => 'Não pode exceder a capacidade total';
-
-  @override
-  String get units => 'Units';
 }
 
 /// The translations for Portuguese, as used in Brazil (`pt_BR`).
@@ -1013,6 +1013,9 @@ class AppLocalizationsPtBr extends AppLocalizationsPt {
 
   @override
   String get exportDataSubtitle => 'Salve seus dados em um arquivo JSON';
+
+  @override
+  String get units => 'Unidades';
 
   @override
   String get updateNoCompatibleApk =>

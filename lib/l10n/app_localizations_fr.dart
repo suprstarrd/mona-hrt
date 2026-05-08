@@ -267,6 +267,9 @@ class AppLocalizationsFr extends AppLocalizations {
       'Enregistrer vos données dans un fichier JSON';
 
   @override
+  String get units => 'Unités';
+
+  @override
   String get updateNoCompatibleApk =>
       'Aucune mise à jour compatible avec votre appareil.';
 
@@ -755,7 +758,4 @@ class AppLocalizationsFr extends AppLocalizations {
   @override
   String get cannotExceedTotalCapacity =>
       'Ne peut pas dépasser la capacité totale';
-
-  @override
-  String get units => 'Units';
 }

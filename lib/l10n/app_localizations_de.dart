@@ -267,6 +267,9 @@ class AppLocalizationsDe extends AppLocalizations {
   String get exportDataSubtitle => 'Daten in einer JSON-Datei speichern';
 
   @override
+  String get units => 'Einheiten';
+
+  @override
   String get updateNoCompatibleApk =>
       'Keine kompatible Aktualisierung für dein Gerät gefunden.';
 
@@ -757,7 +760,4 @@ class AppLocalizationsDe extends AppLocalizations {
   @override
   String get cannotExceedTotalCapacity =>
       'Darf die Gesamtkapazität nicht überschreiten';
-
-  @override
-  String get units => 'Units';
 }
