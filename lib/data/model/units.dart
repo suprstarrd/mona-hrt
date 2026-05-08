@@ -5,7 +5,7 @@ abstract interface class Unit<T> implements Enum {
 
   Unit(this.name);
 
-  num convert(num value, T into);
+  Decimal convert(Decimal value, T into);
 }
 
 enum EstradiolUnit implements Unit<EstradiolUnit> {
@@ -19,12 +19,15 @@ enum EstradiolUnit implements Unit<EstradiolUnit> {
 
   const EstradiolUnit(this.name);
 
+  static Decimal _factor = Decimal.parse('3.671');
+
   @override
-  num convert(num value, EstradiolUnit into) {
+  Decimal convert(Decimal value, EstradiolUnit into) {
     if (into == this) return value;
     return switch (into) {
-      EstradiolUnit.pg_mL => value / 3.671,
-      EstradiolUnit.pmol_L => value * 3.671
+      EstradiolUnit.pg_mL =>
+        (value / _factor).toDecimal(scaleOnInfinitePrecision: 2),
+      EstradiolUnit.pmol_L => value * _factor
     };
   }
 
@@ -61,12 +64,15 @@ enum TestosteroneUnit implements Unit<TestosteroneUnit> {
     }
   }
 
+  static Decimal _factor = Decimal.parse('28.84');
+
   @override
-  num convert(num value, TestosteroneUnit into) {
+  Decimal convert(Decimal value, TestosteroneUnit into) {
     if (into == this) return value;
     return switch (into) {
-      TestosteroneUnit.ng_dL => value * 28.84,
-      TestosteroneUnit.nmol_L => value / 28.84
+      TestosteroneUnit.ng_dL => value * _factor,
+      TestosteroneUnit.nmol_L =>
+        (value / _factor).toDecimal(scaleOnInfinitePrecision: 2)
     };
   }
 
@@ -105,8 +111,8 @@ class UnitValue<U extends Unit> {
 
   UnitValue(this.value, this.unit);
 
-  double inUnit(U unit) {
-    return this.unit.convert(value.toDouble(), unit).toDouble();
+  Decimal inUnit(U unit) {
+    return this.unit.convert(value, unit);
   }
 
   @override

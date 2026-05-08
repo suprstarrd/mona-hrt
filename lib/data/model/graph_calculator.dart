@@ -1,5 +1,6 @@
 import 'dart:math' as math;
 
+import 'package:decimal/decimal.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:mona/data/model/ester.dart';
 import 'package:mona/data/model/units.dart';
@@ -85,7 +86,9 @@ class GraphCalculator {
     final concentration = daysAndIntakes.entries
         .map((e) => _singleInjectionConcentration(t, e.key, e.value))
         .fold(0.0, (sum, val) => sum + val);
-    return EstradiolUnit.pg_mL.convert(concentration, unit).toDouble();
+    return EstradiolUnit.pg_mL
+        .convert(Decimal.parse(concentration.toStringAsFixed(2)), unit)
+        .toDouble();
   }
 
   List<FlSpot> generateFlSpots(

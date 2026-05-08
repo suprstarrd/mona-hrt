@@ -48,7 +48,7 @@ class BloodTestProvider extends ChangeNotifier {
           .map(
             (bloodtest) => MapEntry(
               bloodtest.localDate.differenceInDays(startDate),
-              bloodtest.estradiolLevels!.inUnit(unit),
+              bloodtest.estradiolLevels!.inUnit(unit).toDouble(),
             ),
           ),
     );
