@@ -87,39 +87,39 @@ const String _supplyItemsV6 = '''
     )
     ''';
 
+const Map<int, List<String>> _historicalSchemas = {
+  4: [
+    _supplyItemsV4,
+    _medicationIntakesV4,
+    _medicationSchedulesV4,
+    _bloodTestsV4,
+  ],
+  5: [
+    _supplyItemsV4,
+    _medicationIntakesV5,
+    _medicationSchedulesV4,
+    _bloodTestsV4,
+  ],
+  6: [
+    _supplyItemsV6,
+    _medicationIntakesV5,
+    _medicationSchedulesV4,
+    _bloodTestsV4,
+  ],
+  7: [
+    createSupplyItemsTable,
+    createMedicationIntakesTable,
+    createMedicationSchedulesTable,
+    createBloodTestsTable,
+  ],
+};
+
 List<String> historicalSchemaFor(int version) {
-  switch (version) {
-    case 4:
-      return [
-        _supplyItemsV4,
-        _medicationIntakesV4,
-        _medicationSchedulesV4,
-        _bloodTestsV4,
-      ];
-    case 5:
-      return [
-        _supplyItemsV4,
-        _medicationIntakesV5,
-        _medicationSchedulesV4,
-        _bloodTestsV4,
-      ];
-    case 6:
-      return [
-        _supplyItemsV6,
-        _medicationIntakesV5,
-        _medicationSchedulesV4,
-        _bloodTestsV4,
-      ];
-    case 7:
-      return [
-        createSupplyItemsTable,
-        createMedicationIntakesTable,
-        createMedicationSchedulesTable,
-        createBloodTestsTable,
-      ];
-    default:
-      throw ArgumentError(
-        'No historical schema registered for database version $version',
-      );
+  final schema = _historicalSchemas[version];
+  if (schema == null) {
+    throw ArgumentError(
+      'No historical schema registered for database version $version',
+    );
   }
+  return schema;
 }
