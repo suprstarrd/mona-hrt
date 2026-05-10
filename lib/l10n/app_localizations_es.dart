@@ -42,10 +42,7 @@ class AppLocalizationsEs extends AppLocalizations {
   String get upcoming => 'Próximamente';
 
   @override
-  String get today => 'Hoy';
-
-  @override
-  String get taken => 'tomado';
+  String get taken => 'Tomado';
 
   @override
   String daysAgoCount(int count) {
@@ -93,47 +90,40 @@ class AppLocalizationsEs extends AppLocalizations {
   String get deprecated => 'Obsoleto';
 
   @override
-  String get legacyVersionMessage =>
-      'Estás usando una versión obsoleta de Mona. Por favor, actualízala. Toca para más información.';
+  String get legacyVersionMessage => 'Estás usando una versión obsoleta de Mona. Por favor, actualízala. Toca para más información.';
 
   @override
-  String get legacyDeprecationIntro =>
-      'Esta versión de Mona está obsoleta. Para seguir usando Mona y recibir actualizaciones, instala la nueva versión siguiendo los pasos a continuación.';
+  String get legacyDeprecationIntro => 'Esta versión de Mona está obsoleta. Para seguir usando Mona y recibir actualizaciones, instala la nueva versión siguiendo los pasos a continuación.';
 
   @override
   String get legacyStep1Title => 'Exporta tus datos';
 
   @override
-  String get legacyStep1Description =>
-      'En Configuración, toca \'Exportar datos\' para guardar una copia JSON de tus datos.';
+  String get legacyStep1Description => 'En Configuración, toca \'Exportar datos\' para guardar una copia JSON de tus datos.';
 
   @override
   String get legacyStep2Title => 'Descarga la nueva versión';
 
   @override
-  String get legacyStep2Description =>
-      'Descarga en Play Store. O, desde la última versión en GitHub, descarga el archivo llamado mona-<version>.apk.';
+  String get legacyStep2Description => 'Descarga en Play Store. O, desde la última versión en GitHub, descarga el archivo llamado mona-<version>.apk.';
 
   @override
   String get legacyStep3Title => 'Desinstala esta versión';
 
   @override
-  String get legacyStep3Description =>
-      'Elimina esta aplicación de tu dispositivo. Tu archivo de copia de seguridad está a salvo.';
+  String get legacyStep3Description => 'Elimina esta aplicación de tu dispositivo. Tu archivo de copia de seguridad está a salvo.';
 
   @override
   String get legacyStep4Title => 'Instala el nuevo APK';
 
   @override
-  String get legacyStep4Description =>
-      'Abre el archivo APK que descargaste y sigue las instrucciones de Android para instalarlo.';
+  String get legacyStep4Description => 'Abre el archivo APK que descargaste y sigue las instrucciones de Android para instalarlo.';
 
   @override
   String get legacyStep5Title => 'Importa tus datos';
 
   @override
-  String get legacyStep5Description =>
-      'Abre la nueva Mona, ve a Configuración y toca \'Importar datos\' para restaurar tu copia de seguridad.';
+  String get legacyStep5Description => 'Abre la nueva Mona, ve a Configuración y toca \'Importar datos\' para restaurar tu copia de seguridad.';
 
   @override
   String get openLatestRelease => 'Ver en GitHub';
@@ -183,37 +173,31 @@ class AppLocalizationsEs extends AppLocalizations {
   String get enableNotifications => 'Activar notificaciones';
 
   @override
-  String get enableNotificationsDescription =>
-      'Enviar recordatorios para los horarios';
+  String get enableNotificationsDescription => 'Enviar recordatorios para los horarios';
 
   @override
-  String get notificationsDisabledTitle =>
-      'Las notificaciones están desactivadas';
+  String get notificationsDisabledTitle => 'Las notificaciones están desactivadas';
 
   @override
   String get clickToOpenSettings => 'Haz clic para abrir la configuración';
 
   @override
-  String get exactRemindersDisabled =>
-      'Hora exacta de los recordatorios desactivada';
+  String get exactRemindersDisabled => 'Hora exacta de los recordatorios desactivada';
 
   @override
-  String get remindersDelayed =>
-      'Los recordatorios pueden retrasarse ligeramente. Toca para abrir la configuración.';
+  String get remindersDelayed => 'Los recordatorios pueden retrasarse ligeramente. Toca para abrir la configuración.';
 
   @override
   String get autoUpdate => 'Actualización automática';
 
   @override
-  String get autoUpdateDescription =>
-      'Buscar automáticamente nuevas actualizaciones al iniciar la aplicación';
+  String get autoUpdateDescription => 'Buscar automáticamente nuevas actualizaciones al iniciar la aplicación';
 
   @override
   String get checkForUpdates => 'Buscar actualizaciones';
 
   @override
-  String get checkForUpdatesDescription =>
-      'Buscar manualmente la última versión\nEsto se conectará a Internet\n(No se enviarán datos)';
+  String get checkForUpdatesDescription => 'Buscar manualmente la última versión\nEsto se conectará a Internet\n(No se enviarán datos)';
 
   @override
   String appVersion(Object version) {
@@ -237,8 +221,7 @@ class AppLocalizationsEs extends AppLocalizations {
   String get importDataSubtitle => 'Restaurar datos desde una copia JSON';
 
   @override
-  String get importDataOverwriteWarning =>
-      'Esto sobrescribirá todos tus datos actuales con la copia de seguridad. Esta acción no se puede deshacer. ¿Deseas continuar?';
+  String get importDataOverwriteWarning => 'Esto sobrescribirá todos tus datos actuales con la copia de seguridad. Esta acción no se puede deshacer. ¿Deseas continuar?';
 
   @override
   String get importConfirm => 'Importar';
@@ -247,8 +230,7 @@ class AppLocalizationsEs extends AppLocalizations {
   String get importSuccessfulTitle => 'Importación correcta';
 
   @override
-  String get importRestartRequired =>
-      'Reinicia la aplicación para aplicar los datos restaurados.';
+  String get importRestartRequired => 'Reinicia la aplicación para aplicar los datos restaurados.';
 
   @override
   String get closeApp => 'Cerrar aplicación';
@@ -274,15 +256,13 @@ class AppLocalizationsEs extends AppLocalizations {
   String get units => 'Unidades';
 
   @override
-  String get updateNoCompatibleApk =>
-      'No se encontró ninguna actualización compatible con tu dispositivo.';
+  String get updateNoCompatibleApk => 'No se encontró ninguna actualización compatible con tu dispositivo.';
 
   @override
   String get updateAppUpToDate => '¡Tu aplicación está actualizada!';
 
   @override
-  String get updateCheckNetworkError =>
-      'No se pudieron comprobar las actualizaciones en este momento.';
+  String get updateCheckNetworkError => 'No se pudieron comprobar las actualizaciones en este momento.';
 
   @override
   String get updateDialogTitle => 'Actualización disponible';
@@ -296,8 +276,7 @@ class AppLocalizationsEs extends AppLocalizations {
   String get updateDownloadAndInstall => 'Descargar e instalar';
 
   @override
-  String get updateInstallPermissionRequired =>
-      'Se necesita permiso para instalar actualizaciones.';
+  String get updateInstallPermissionRequired => 'Se necesita permiso para instalar actualizaciones.';
 
   @override
   String get updateDownloadingTitle => 'Descargando actualización...';
@@ -308,8 +287,7 @@ class AppLocalizationsEs extends AppLocalizations {
   }
 
   @override
-  String get updateDownloadFailed =>
-      'Error en la descarga. Comprueba tu conexión.';
+  String get updateDownloadFailed => 'Error en la descarga. Comprueba tu conexión.';
 
   @override
   String notificationMedicationReminderTitle(Object scheduleName) {
@@ -370,12 +348,10 @@ class AppLocalizationsEs extends AppLocalizations {
   }
 
   @override
-  String get notificationsUpdated =>
-      '¡Las notificaciones han sido actualizadas!';
+  String get notificationsUpdated => '¡Las notificaciones han sido actualizadas!';
 
   @override
-  String get notificationsUpdatedDescription =>
-      'Cada horario ahora tiene sus propias notificaciones.\n\nConfigura las notificaciones de tus horarios para no perderte nada.';
+  String get notificationsUpdatedDescription => 'Cada horario ahora tiene sus propias notificaciones.\n\nConfigura las notificaciones de tus horarios para no perderte nada.';
 
   @override
   String get dontShowAgain => 'No mostrar de nuevo';
@@ -431,15 +407,13 @@ class AppLocalizationsEs extends AppLocalizations {
   String get microliters => 'μL';
 
   @override
-  String get empty_levels =>
-      'Las inyecciones de estradiol se mostrarán en esta pestaña';
+  String get empty_levels => 'Las inyecciones de estradiol se mostrarán en esta pestaña';
 
   @override
   String get bloodTestsTitle => 'Análisis de sangre';
 
   @override
-  String get empty_blood_tests =>
-      'Los análisis de sangre registrados aparecerán aquí. ¡Empieza con el botón Añadir!';
+  String get empty_blood_tests => 'Los análisis de sangre registrados aparecerán aquí. ¡Empieza con el botón Añadir!';
 
   @override
   String get addBloodTest => 'Añadir un análisis de sangre';
@@ -473,8 +447,7 @@ class AppLocalizationsEs extends AppLocalizations {
   }
 
   @override
-  String get empty_supplies =>
-      'Sin suministros. Añade un elemento para comenzar.';
+  String get empty_supplies => 'Sin suministros. Añade un elemento para comenzar.';
 
   @override
   String get newItem => 'Nuevo elemento';
@@ -613,8 +586,7 @@ class AppLocalizationsEs extends AppLocalizations {
   String get medicationEstradiolBenzoate => 'Benzoato de estradiol';
 
   @override
-  String get medicationEstradiolCypionateSuspension =>
-      'Suspensión de cipionato de estradiol';
+  String get medicationEstradiolCypionateSuspension => 'Suspensión de cipionato de estradiol';
 
   @override
   String get medicationTestosteroneEnanthate => 'Enantato de testosterona';
@@ -632,8 +604,7 @@ class AppLocalizationsEs extends AppLocalizations {
   String get medicationTestosteroneBenzoate => 'Benzoato de testosterona';
 
   @override
-  String get medicationTestosteroneCypionateSuspension =>
-      'Suspensión de cipionato de testosterona';
+  String get medicationTestosteroneCypionateSuspension => 'Suspensión de cipionato de testosterona';
 
   @override
   String get injection => 'Inyección';

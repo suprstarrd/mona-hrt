@@ -11,8 +11,7 @@
     "allDone": "Alles erledigt!",
     "noIntakesDue": "Heute sind keine Einnahmen fällig",
     "upcoming": "Bevorstehend",
-    "today": "Heute",
-    "taken": "genommen",
+    "taken": "Genommen",
     "daysAgoCount": "{count, plural, =1{gestern} other{vor {count} Tagen}}",
     "@daysAgoCount": {
         "description": "=1 „gestern“; sonst „vor # Tagen“.",

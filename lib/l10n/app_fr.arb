@@ -11,8 +11,7 @@
   "allDone": "Terminé !",
   "noIntakesDue": "Aucune prise prévue aujourd'hui",
   "upcoming": "À venir",
-  "today": "Aujourd'hui",
-  "taken": "pris",
+  "taken": "Pris",
   "daysAgoCount": "{count, plural, =1{hier} other{il y a {count} jours}}",
   "@daysAgoCount": {
     "description": "Décalage passé en jours ; =1 = hier (mot, pas « il y a 1 jour »).",

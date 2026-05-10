@@ -31,143 +31,6 @@ void main() {
     );
   });
 
-  group('ScheduleManager - getSchedulesByStatus', () {
-    late MedicationSchedule todaySchedule;
-    late MedicationSchedule todayTakenSchedule;
-    late MedicationSchedule todayOverdueSchedule;
-    late MedicationSchedule overdueSchedule;
-    late MedicationSchedule upcomingSchedule;
-
-    setUp(() {
-      final today = Date.today();
-
-      todaySchedule = IntervalDaysSchedule(
-        id: 1,
-        name: 'TodayMed',
-        dose: Decimal.one,
-        intervalDays: 2,
-        startDate: today,
-        molecule: KnownMolecules.estradiol,
-        administrationRoute: AdministrationRoute.oral,
-        notificationTimes: List.empty(),
-      );
-      when(mockIntakeProvider.getLastIntakeLocalDateForSchedule(1))
-          .thenReturn(today.subtract(const Duration(days: 2)));
-
-      todayTakenSchedule = IntervalDaysSchedule(
-        id: 5,
-        name: 'TodayMed',
-        dose: Decimal.one,
-        intervalDays: 2,
-        startDate: today,
-        molecule: KnownMolecules.estradiol,
-        administrationRoute: AdministrationRoute.oral,
-        notificationTimes: List.empty(),
-      );
-      when(mockIntakeProvider.getLastIntakeLocalDateForSchedule(5))
-          .thenReturn(Date.today());
-
-      todayOverdueSchedule = IntervalDaysSchedule(
-        id: 4,
-        name: 'TodayLateMed',
-        dose: Decimal.one,
-        intervalDays: 2,
-        startDate: today.subtract(const Duration(days: 4)),
-        molecule: KnownMolecules.estradiol,
-        administrationRoute: AdministrationRoute.oral,
-        notificationTimes: List.empty(),
-      );
-      when(mockIntakeProvider.getLastIntakeLocalDateForSchedule(4))
-          .thenReturn(today.subtract(const Duration(days: 3)));
-
-      overdueSchedule = IntervalDaysSchedule(
-        id: 2,
-        name: 'OverdueMed',
-        dose: Decimal.one,
-        intervalDays: 2,
-        startDate: today.subtract(const Duration(days: 9)),
-        molecule: KnownMolecules.estradiol,
-        administrationRoute: AdministrationRoute.oral,
-        notificationTimes: List.empty(),
-      );
-      when(mockIntakeProvider.getLastIntakeLocalDateForSchedule(2))
-          .thenReturn(today.subtract(const Duration(days: 4)));
-
-      upcomingSchedule = IntervalDaysSchedule(
-        id: 3,
-        name: 'UpcomingMed',
-        dose: Decimal.one,
-        intervalDays: 2,
-        startDate: today.add(const Duration(days: 10)),
-        molecule: KnownMolecules.estradiol,
-        administrationRoute: AdministrationRoute.oral,
-        notificationTimes: List.empty(),
-      );
-      when(mockIntakeProvider.getLastIntakeLocalDateForSchedule(3))
-          .thenReturn(null);
-
-      when(mockScheduleProvider.schedules).thenReturn([
-        todaySchedule,
-        todayOverdueSchedule,
-        overdueSchedule,
-        todayTakenSchedule,
-        upcomingSchedule,
-      ]);
-    });
-
-    test('today returns schedules due today, not late and not taken', () {
-      final today = Date.today();
-
-      when(mockIntakeProvider.getLastIntakeLocalDateForSchedule(1))
-          .thenReturn(today.subtract(const Duration(days: 2)));
-
-      final result = manager.getSchedulesByStatus(ScheduleStatus.today);
-      expect(result, [todaySchedule]);
-    });
-
-    test('upcoming return upcoming schedules', () {
-      final result = manager.getSchedulesByStatus(ScheduleStatus.upcoming);
-      expect(result, [upcomingSchedule]);
-    });
-
-    test('todayOverdue returns only todayOverdue schedules', () {
-      final result = manager.getSchedulesByStatus(ScheduleStatus.todayOverdue);
-      expect(result, [todayOverdueSchedule]);
-    });
-
-    test('overdue returns only overdue schedules', () {
-      final result = manager.getSchedulesByStatus(ScheduleStatus.overdue);
-      expect(result, [overdueSchedule]);
-    });
-
-    test('all schedules accounted for across statuses', () {
-      final today = manager.getSchedulesByStatus(ScheduleStatus.today);
-      final todayOverdue =
-          manager.getSchedulesByStatus(ScheduleStatus.todayOverdue);
-      final overdue = manager.getSchedulesByStatus(ScheduleStatus.overdue);
-      final upcoming = manager.getSchedulesByStatus(ScheduleStatus.upcoming);
-      final taken = manager.getSchedulesByStatus(ScheduleStatus.taken);
-
-      final combined = [
-        ...today,
-        ...todayOverdue,
-        ...overdue,
-        ...upcoming,
-        ...taken
-      ];
-      expect(combined.length, 5);
-      expect(
-          combined,
-          containsAll([
-            todaySchedule,
-            todayOverdueSchedule,
-            overdueSchedule,
-            upcomingSchedule,
-            todayTakenSchedule
-          ]));
-    });
-  });
-
   group('ScheduleManager - getSlots', () {
     late IntervalDaysSchedule todaySchedule;
     late IntervalDaysSchedule todayTakenSchedule;
@@ -318,6 +181,101 @@ void main() {
 
       expect(slot.schedule, upcomingSchedule);
       expect(slot.status, ScheduleStatus.upcoming);
+    });
+  });
+
+  group('ScheduleManager - splitSlotsByDay', () {
+    late IntervalDaysSchedule todaySchedule;
+    late IntervalDaysSchedule takenSchedule;
+    late IntervalDaysSchedule overdueSchedule;
+    late IntervalDaysSchedule upcomingSchedule;
+
+    setUp(() {
+      final today = Date.today();
+
+      todaySchedule = IntervalDaysSchedule(
+        id: 1,
+        name: 'TodayMed',
+        dose: Decimal.one,
+        intervalDays: 2,
+        startDate: today,
+        molecule: KnownMolecules.estradiol,
+        administrationRoute: AdministrationRoute.oral,
+        notificationTimes: List.empty(),
+      );
+      when(mockIntakeProvider.getLastIntakeLocalDateForSchedule(1))
+          .thenReturn(today.subtract(const Duration(days: 2)));
+
+      takenSchedule = IntervalDaysSchedule(
+        id: 2,
+        name: 'TakenMed',
+        dose: Decimal.one,
+        intervalDays: 2,
+        startDate: today,
+        molecule: KnownMolecules.estradiol,
+        administrationRoute: AdministrationRoute.oral,
+        notificationTimes: List.empty(),
+      );
+      when(mockIntakeProvider.getLastIntakeLocalDateForSchedule(2))
+          .thenReturn(today);
+
+      overdueSchedule = IntervalDaysSchedule(
+        id: 3,
+        name: 'OverdueMed',
+        dose: Decimal.one,
+        intervalDays: 2,
+        startDate: today.subtract(const Duration(days: 9)),
+        molecule: KnownMolecules.estradiol,
+        administrationRoute: AdministrationRoute.oral,
+        notificationTimes: List.empty(),
+      );
+      when(mockIntakeProvider.getLastIntakeLocalDateForSchedule(3))
+          .thenReturn(today.subtract(const Duration(days: 4)));
+
+      upcomingSchedule = IntervalDaysSchedule(
+        id: 4,
+        name: 'UpcomingMed',
+        dose: Decimal.one,
+        intervalDays: 2,
+        startDate: today.add(const Duration(days: 10)),
+        molecule: KnownMolecules.estradiol,
+        administrationRoute: AdministrationRoute.oral,
+        notificationTimes: List.empty(),
+      );
+      when(mockIntakeProvider.getLastIntakeLocalDateForSchedule(4))
+          .thenReturn(null);
+    });
+
+    test('returns two empty lists when there are no schedules', () {
+      when(mockScheduleProvider.schedules).thenReturn([]);
+
+      final split = manager.splitSlotsByDay();
+
+      expect(split.today, isEmpty);
+      expect(split.upcoming, isEmpty);
+    });
+
+    test('groups today, taken and overdue slots under today', () {
+      when(mockScheduleProvider.schedules)
+          .thenReturn([todaySchedule, takenSchedule, overdueSchedule]);
+
+      final split = manager.splitSlotsByDay();
+
+      expect(
+        split.today.map((slot) => slot.schedule),
+        [todaySchedule, takenSchedule, overdueSchedule],
+      );
+      expect(split.upcoming, isEmpty);
+    });
+
+    test('puts upcoming slots under upcoming', () {
+      when(mockScheduleProvider.schedules)
+          .thenReturn([todaySchedule, upcomingSchedule]);
+
+      final split = manager.splitSlotsByDay();
+
+      expect(split.today.map((slot) => slot.schedule), [todaySchedule]);
+      expect(split.upcoming.map((slot) => slot.schedule), [upcomingSchedule]);
     });
   });
 }

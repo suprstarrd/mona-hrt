@@ -23,14 +23,6 @@ class ScheduleManager {
   ScheduleManager(
       this._medicationScheduleProvider, this._medicationIntakeProvider);
 
-  List<IntervalDaysSchedule> getSchedulesByStatus(ScheduleStatus status) {
-    return _medicationScheduleProvider.schedules
-        .whereType<IntervalDaysSchedule>()
-        .where(
-            (schedule) => schedule.statusFor(_lastTakenFor(schedule)) == status)
-        .toList();
-  }
-
   List<ScheduleSlot> getSlots() {
     return _medicationScheduleProvider.schedules
         .whereType<IntervalDaysSchedule>()
@@ -40,6 +32,21 @@ class ScheduleManager {
               time: null,
             ))
         .toList();
+  }
+
+  ({List<ScheduleSlot> today, List<ScheduleSlot> upcoming}) splitSlotsByDay() {
+    final today = <ScheduleSlot>[];
+    final upcoming = <ScheduleSlot>[];
+
+    for (final slot in getSlots()) {
+      if (slot.status == ScheduleStatus.upcoming) {
+        upcoming.add(slot);
+      } else {
+        today.add(slot);
+      }
+    }
+
+    return (today: today, upcoming: upcoming);
   }
 
   Date? _lastTakenFor(IntervalDaysSchedule schedule) =>

@@ -11,8 +11,7 @@
     "allDone": "Tudo pronto!",
     "noIntakesDue": "Nenhuma dose pendente hoje",
     "upcoming": "Próximos",
-    "today": "Hoje",
-    "taken": "tomado",
+    "taken": "Tomado",
     "daysAgoCount": "{count, plural, =1{ontem} other{há {count} dias}}",
     "@daysAgoCount": {
         "description": "=1 ontem; resto há # dias.",

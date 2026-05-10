@@ -11,8 +11,7 @@
     "allDone": "¡Todo listo!",
     "noIntakesDue": "No hay tomas pendientes hoy",
     "upcoming": "Próximamente",
-    "today": "Hoy",
-    "taken": "tomado",
+    "taken": "Tomado",
     "daysAgoCount": "{count, plural, =1{ayer} other{hace {count} días}}",
     "@daysAgoCount": {
         "description": "=1 ayer; resto hace # días.",

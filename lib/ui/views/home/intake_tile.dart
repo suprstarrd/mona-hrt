@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:material_symbols_icons/symbols.dart';
 import 'package:mona/controllers/medication_intake_manager.dart';
+import 'package:mona/controllers/schedule_manager.dart';
 import 'package:mona/data/model/administration_route.dart';
 import 'package:mona/data/model/date.dart';
 import 'package:mona/data/model/medication_schedule.dart';
@@ -16,14 +17,12 @@ import 'package:mona/ui/views/home/take_medication_page.dart';
 import 'package:provider/provider.dart';
 
 class IntakeTile extends StatelessWidget {
-  const IntakeTile({
-    super.key,
-    required this.schedule,
-    required this.status,
-  });
+  const IntakeTile(this.slot, {super.key});
 
-  final IntervalDaysSchedule schedule;
-  final ScheduleStatus status;
+  final ScheduleSlot slot;
+
+  IntervalDaysSchedule get schedule => slot.schedule as IntervalDaysSchedule;
+  ScheduleStatus get status => slot.status;
 
   @override
   Widget build(BuildContext context) {
@@ -65,10 +64,11 @@ class IntakeTile extends StatelessWidget {
           title: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(
-                viewModel.scheduledText,
-                style: theme.textTheme.labelMedium?.copyWith(color: textColor),
-              ),
+              if (viewModel.scheduledText != null)
+                Text(
+                  viewModel.scheduledText!,
+                  style: theme.textTheme.labelMedium?.copyWith(color: textColor),
+                ),
               Text(
                 schedule.name,
                 style: theme.textTheme.titleMedium?.copyWith(color: textColor),
@@ -154,12 +154,12 @@ class IntakeTileViewModel {
         "${schedule.administrationRoute == AdministrationRoute.injection ? " • ${nextSide.localizedSummary(localizations)}" : ""}";
   }
 
-  String get scheduledText {
+  String? get scheduledText {
     switch (status) {
       case ScheduleStatus.today:
       case ScheduleStatus.todayOverdue:
       case ScheduleStatus.todayEarly:
-        return localizations.today;
+        return null;
 
       case ScheduleStatus.overdue:
         final formatted = lastScheduled!.format(DateFormat.MMMMd(languageTag));
@@ -176,21 +176,16 @@ class IntakeTileViewModel {
 
   String? get warningText {
     switch (status) {
-      case ScheduleStatus.today:
       case ScheduleStatus.todayEarly:
-        if (lastTaken != null &&
-            lastScheduled != null &&
-            !lastTaken!.isSameDayAs(lastScheduled!)) {
-          final formatted = lastTaken!.format(DateFormat.MMMd(languageTag));
-          return "${localizations.lastTaken} ${localizations.daysAgoCount(daysSinceLastTaken!)} ($formatted)";
-        }
-        return null;
+        final formatted = lastTaken!.format(DateFormat.MMMd(languageTag));
+        return "${localizations.lastTaken} ${localizations.daysAgoCount(daysSinceLastTaken!)} ($formatted)";
 
+      case ScheduleStatus.today:
       case ScheduleStatus.upcoming:
       case ScheduleStatus.taken:
+      case ScheduleStatus.overdue:
         return null;
 
-      case ScheduleStatus.overdue:
       case ScheduleStatus.todayOverdue:
         if (lastTaken == null) {
           return localizations.neverTakenYet;
@@ -207,6 +202,16 @@ class IntakeTileViewModel {
       status == ScheduleStatus.todayOverdue;
 
   Widget get tileIcon {
+    if (status == ScheduleStatus.taken) {
+      return CircleAvatar(
+        backgroundColor: theme.colorScheme.tertiary,
+        child: Icon(
+          Symbols.check,
+          color: theme.colorScheme.onTertiary,
+        ),
+      );
+    }
+
     if (status == ScheduleStatus.upcoming) {
       return CircleAvatar(
         backgroundColor: theme.colorScheme.secondary,
