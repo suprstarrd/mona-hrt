@@ -167,4 +167,137 @@ void main() {
           ]));
     });
   });
+
+  group('ScheduleManager - getSlots', () {
+    late IntervalDaysSchedule todaySchedule;
+    late IntervalDaysSchedule todayTakenSchedule;
+    late IntervalDaysSchedule todayOverdueSchedule;
+    late IntervalDaysSchedule overdueSchedule;
+    late IntervalDaysSchedule upcomingSchedule;
+
+    setUp(() {
+      final today = Date.today();
+
+      todaySchedule = IntervalDaysSchedule(
+        id: 1,
+        name: 'TodayMed',
+        dose: Decimal.one,
+        intervalDays: 2,
+        startDate: today,
+        molecule: KnownMolecules.estradiol,
+        administrationRoute: AdministrationRoute.oral,
+        notificationTimes: List.empty(),
+      );
+      when(mockIntakeProvider.getLastIntakeLocalDateForSchedule(1))
+          .thenReturn(today.subtract(const Duration(days: 2)));
+
+      todayTakenSchedule = IntervalDaysSchedule(
+        id: 5,
+        name: 'TodayTakenMed',
+        dose: Decimal.one,
+        intervalDays: 2,
+        startDate: today,
+        molecule: KnownMolecules.estradiol,
+        administrationRoute: AdministrationRoute.oral,
+        notificationTimes: List.empty(),
+      );
+      when(mockIntakeProvider.getLastIntakeLocalDateForSchedule(5))
+          .thenReturn(today);
+
+      todayOverdueSchedule = IntervalDaysSchedule(
+        id: 4,
+        name: 'TodayLateMed',
+        dose: Decimal.one,
+        intervalDays: 2,
+        startDate: today.subtract(const Duration(days: 4)),
+        molecule: KnownMolecules.estradiol,
+        administrationRoute: AdministrationRoute.oral,
+        notificationTimes: List.empty(),
+      );
+      when(mockIntakeProvider.getLastIntakeLocalDateForSchedule(4))
+          .thenReturn(today.subtract(const Duration(days: 3)));
+
+      overdueSchedule = IntervalDaysSchedule(
+        id: 2,
+        name: 'OverdueMed',
+        dose: Decimal.one,
+        intervalDays: 2,
+        startDate: today.subtract(const Duration(days: 9)),
+        molecule: KnownMolecules.estradiol,
+        administrationRoute: AdministrationRoute.oral,
+        notificationTimes: List.empty(),
+      );
+      when(mockIntakeProvider.getLastIntakeLocalDateForSchedule(2))
+          .thenReturn(today.subtract(const Duration(days: 4)));
+
+      upcomingSchedule = IntervalDaysSchedule(
+        id: 3,
+        name: 'UpcomingMed',
+        dose: Decimal.one,
+        intervalDays: 2,
+        startDate: today.add(const Duration(days: 10)),
+        molecule: KnownMolecules.estradiol,
+        administrationRoute: AdministrationRoute.oral,
+        notificationTimes: List.empty(),
+      );
+      when(mockIntakeProvider.getLastIntakeLocalDateForSchedule(3))
+          .thenReturn(null);
+    });
+
+    test('returns empty list when there are no schedules', () {
+      when(mockScheduleProvider.schedules).thenReturn([]);
+
+      expect(manager.getSlots(), isEmpty);
+    });
+
+    test('schedule due today, not late, not taken yields today/not taken', () {
+      when(mockScheduleProvider.schedules).thenReturn([todaySchedule]);
+
+      final slot = manager.getSlots().single;
+
+      expect(slot.schedule, todaySchedule);
+      expect(slot.status, ScheduleStatus.today);
+      expect(slot.taken, isFalse);
+    });
+
+    test('schedule due today and taken today yields today/taken', () {
+      when(mockScheduleProvider.schedules).thenReturn([todayTakenSchedule]);
+
+      final slot = manager.getSlots().single;
+
+      expect(slot.schedule, todayTakenSchedule);
+      expect(slot.status, ScheduleStatus.today);
+      expect(slot.taken, isTrue);
+    });
+
+    test('schedule due today and late yields todayOverdue/not taken', () {
+      when(mockScheduleProvider.schedules).thenReturn([todayOverdueSchedule]);
+
+      final slot = manager.getSlots().single;
+
+      expect(slot.schedule, todayOverdueSchedule);
+      expect(slot.status, ScheduleStatus.todayOverdue);
+      expect(slot.taken, isFalse);
+    });
+
+    test('schedule not due today but late yields overdue/not taken', () {
+      when(mockScheduleProvider.schedules).thenReturn([overdueSchedule]);
+
+      final slot = manager.getSlots().single;
+
+      expect(slot.schedule, overdueSchedule);
+      expect(slot.status, ScheduleStatus.overdue);
+      expect(slot.taken, isFalse);
+    });
+
+    test('schedule not due today and not late yields upcoming/not taken', () {
+      when(mockScheduleProvider.schedules).thenReturn([upcomingSchedule]);
+
+      final slot = manager.getSlots().single;
+
+      expect(slot.schedule, upcomingSchedule);
+      expect(slot.status, ScheduleStatus.upcoming);
+      expect(slot.taken, isFalse);
+    });
+  });
 }
