@@ -8,6 +8,8 @@ import 'package:provider/provider.dart';
 import 'main_tabs.dart';
 
 class MainPage extends StatefulWidget {
+  const MainPage({super.key});
+
   @override
   State<MainPage> createState() => _MainPageState();
 }

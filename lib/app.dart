@@ -121,7 +121,7 @@ class _MonaAppState extends State<MonaApp> with WidgetsBindingObserver {
             colorScheme: darkColorScheme,
           ),
           themeMode: ThemeMode.system,
-          home: MainPage(),
+          home: const MainPage(),
         );
       },
     );

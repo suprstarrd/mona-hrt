@@ -25,7 +25,7 @@ import 'package:provider/provider.dart';
 class EditIntakePage extends StatefulWidget {
   final MedicationIntake intake;
 
-  EditIntakePage(this.intake);
+  const EditIntakePage(this.intake, {super.key});
 
   @override
   State<EditIntakePage> createState() => _EditIntakePageState();
