@@ -62,13 +62,12 @@ class UpdateService {
         if (!context.mounted) return;
 
         if (latest > current) {
-          final bestAsset = await _getBestAssetForDevice(assets);
+          final asset = _getAsset(assets);
 
           if (!context.mounted) return;
 
-          if (bestAsset != null) {
-            _showUpdateDialog(
-                context, currentVersion, latestVersion, bestAsset);
+          if (asset != null) {
+            _showUpdateDialog(context, currentVersion, latestVersion, asset);
           } else {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(content: Text(l10n.updateNoCompatibleApk)),
@@ -91,7 +90,7 @@ class UpdateService {
     }
   }
 
-  Future<Map<String, dynamic>?> _getBestAssetForDevice(List assets) async {
+  Map<String, dynamic>? _getAsset(List assets) {
     final apkAssets =
         assets.where((a) => a['name'].toString().endsWith('.apk')).toList();
     if (apkAssets.isEmpty) return null;
