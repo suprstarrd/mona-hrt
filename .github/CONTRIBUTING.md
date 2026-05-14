@@ -22,9 +22,15 @@ We use a standard **Fork and Pull Request** workflow. To keep our main branch st
 We have provided a script to automatically set up FVM, configure your shell, and fetch the necessary dependencies.
 
 ```bash
-chmod +x setup_dev.sh
-./setup_dev.sh
+chmod +x scripts/setup_dev.sh
+./scripts/setup_dev.sh
 ```
+
+Windows users :
+```powershell
+./scripts/setup_dev.ps1
+```
+
 > [!NOTE]
 > After running the script, you may need to restart your terminal or run `source ~/.bashrc` (or `~/.zshrc`) to use the FVM commands.
 
@@ -50,7 +56,7 @@ fvm flutter run
 fvm flutter test
 ```
 > [!TIP]
-> If you use VS Code, the repository includes a `.vscode/settings.json` file that automatically points the IDE to the FVM SDK. If you use Android Studio, please set your Flutter SDK path to `[project_root]/.fvm/flutter_sdk`.
+> If you use VS Code, the repository includes a `.vscode/settings.json` file that automatically points the IDE to the FVM SDK. If you use Android Studio or IntelliJ IDEA, please set your Flutter SDK path to `[project_root]/.fvm/flutter_sdk` in `File > Settings > Languages & Frameworks > Flutter`.
 
 ## Dependency Rules
 
@@ -92,7 +98,7 @@ If possible, include screenshots, recordings, or error messages -- anything that
 ## You have an idea or suggestion ?
 Any new idea or suggestion is welcome !  
 Here's how you can bring your ideas and suggestions to Mona :
-Open a new issue, where you explain your idea or suggestion. What does it bring to the application, how does it work, where did you source your information (if needed, for example for an algortihm) ... The team will review your issue, discuss with you about it, and accept it if they like it !
+Open a new issue, where you explain your idea or suggestion. What does it bring to the application, how does it work, where did you source your information (if needed, for example for an algorithm) ... The team will review your issue, discuss with you about it, and accept it if they like it !
 
 ## Conventions
 ### Branch name
@@ -105,7 +111,7 @@ The name of the branches you create must follow this pattern : `<type>/<short na
 | doc | when documenting the app |
 | build | when changing how to build the app, or dependencies |
 | ci | when changing the CI/CD scripts |
-| chore | when changing the code without altering functionnalities |
+| chore | when changing the code without altering functionalities |
 
 The short name is one or a few words that quickly tells what the branch will bring to the project. Example : `feat/add-multi-notification`.
 

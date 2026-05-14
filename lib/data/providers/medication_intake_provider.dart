@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:mona/data/model/administration_route.dart';
+import 'package:mona/data/model/date.dart';
 import 'package:mona/data/model/ester.dart';
 import 'package:mona/data/model/medication_intake.dart';
 import 'package:mona/data/model/molecule.dart';
 import 'package:mona/services/repository.dart';
-import 'package:mona/util/date_helpers.dart';
 
 class GraphIntake {
   final double dose;
@@ -86,38 +86,41 @@ class MedicationIntakeProvider extends ChangeNotifier {
 
   Map<int, GraphIntake> getDaysAndIntakes() {
     if (graphIntakes.isEmpty) return {};
-    final startDate = normalizeDate(getFirstIntakeDate()!);
+
+    final startDate = getFirstGraphIntakeLocalDate()!;
     return Map.fromEntries(
       graphIntakes.map(
         (intake) => MapEntry(
-          normalizeDate(intake.takenDateTime!).difference(startDate).inDays,
+          intake.takenLocalDate!.differenceInDays(startDate),
           GraphIntake(intake.dose.toDouble(), intake.ester!),
         ),
       ),
     );
   }
 
-  DateTime? getFirstIntakeDate() {
-    if (takenIntakes.isEmpty) return null;
-    return takenIntakes
+  Date? getFirstGraphIntakeLocalDate() {
+    if (graphIntakes.isEmpty) return null;
+
+    return graphIntakes
         .reduce((a, b) => a.takenDateTime!.isBefore(b.takenDateTime!) ? a : b)
-        .takenDateTime;
+        .takenLocalDate;
   }
 
-  DateTime? getLastIntakeDateFromList(List<MedicationIntake> intakes) {
+  Date? getLastIntakeLocalDateFromList(List<MedicationIntake> intakes) {
     if (intakes.isEmpty) return null;
+
     return intakes
         .reduce((a, b) => a.takenDateTime!.isAfter(b.takenDateTime!) ? a : b)
-        .takenDateTime;
+        .takenLocalDate;
   }
 
-  DateTime? getLastIntakeDate() {
-    return getLastIntakeDateFromList(takenIntakes);
+  Date? getLastGraphIntakeDate() {
+    return getLastIntakeLocalDateFromList(graphIntakes);
   }
 
-  DateTime? getLastIntakeDateForSchedule(int scheduleId) {
+  Date? getLastIntakeLocalDateForSchedule(int scheduleId) {
     final scheduleIntakes = getTakenIntakesForSchedule(scheduleId);
-    return getLastIntakeDateFromList(scheduleIntakes);
+    return getLastIntakeLocalDateFromList(scheduleIntakes);
   }
 
   MedicationIntake? getLastTakenIntake() {
@@ -129,6 +132,7 @@ class MedicationIntakeProvider extends ChangeNotifier {
   static final _medicationIntakeRepository = Repository<MedicationIntake>(
     tableName: 'medication_intakes',
     toMap: (MedicationIntake intake) => intake.toMap(),
-    fromMap: (Map<String, Object?> map) => MedicationIntake.fromMap(map),
+    fromMap: (map) =>
+        MedicationIntakeMapper.fromMap(Map<String, dynamic>.from(map)),
   );
 }

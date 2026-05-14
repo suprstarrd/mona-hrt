@@ -1,3 +1,4 @@
+import 'package:mona/data/model/date.dart';
 import 'package:mona/data/model/medication_schedule.dart';
 import 'package:mona/data/providers/medication_intake_provider.dart';
 import 'package:mona/data/providers/medication_schedule_provider.dart';
@@ -14,8 +15,8 @@ class ScheduleManager {
   List<MedicationSchedule> getSchedulesByStatus(ScheduleStatus status) {
     final List<MedicationSchedule> schedules = [];
     for (final schedule in _medicationScheduleProvider.schedules) {
-      final lastTaken =
-          _medicationIntakeProvider.getLastIntakeDateForSchedule(schedule.id);
+      final Date? lastTaken = _medicationIntakeProvider
+          .getLastIntakeLocalDateForSchedule(schedule.id);
 
       switch (status) {
         case ScheduleStatus.today:

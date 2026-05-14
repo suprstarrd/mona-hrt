@@ -1,125 +1,156 @@
 import 'dart:convert';
 
+import 'package:dart_mappable/dart_mappable.dart';
 import 'package:decimal/decimal.dart';
-import 'package:flutter/material.dart';
 import 'package:mona/data/model/administration_route.dart';
+import 'package:mona/data/model/date.dart';
 import 'package:mona/data/model/ester.dart';
 import 'package:mona/data/model/molecule.dart';
+import 'package:mona/l10n/app_localizations.dart';
+import 'package:mona/util/string_parsing.dart';
+import 'package:mona/util/timezone_location.dart';
 import 'package:mona/util/validators.dart';
+import 'package:timezone/timezone.dart' as tz;
 
+part 'medication_intake.mapper.dart';
+
+@MappableEnum(mode: ValuesMode.named)
 enum InjectionSide {
   left,
   right,
 }
 
-extension InjectionSideDropdown on InjectionSide {
-  static List<DropdownMenuItem<InjectionSide>> get menuItems =>
-      InjectionSide.values
-          .map(
-            (side) => DropdownMenuItem<InjectionSide>(
-              value: side,
-              child: Text(side.name[0].toUpperCase() + side.name.substring(1)),
-            ),
-          )
-          .toList();
-}
-
-class MedicationIntake {
+@MappableClass(
+  includeCustomMappers: [
+    MoleculeJsonMapper(),
+    AdministrationRouteNameMapper(),
+    EsterNameMapper(),
+    DecimalStringMapper(),
+  ],
+  generateMethods: GenerateMethods.all,
+)
+class MedicationIntake with MedicationIntakeMappable {
   final int id;
   final DateTime scheduledDateTime;
   final DateTime? takenDateTime;
+  final String? takenTimeZone;
   final Decimal dose;
   final int? scheduleId;
   final InjectionSide? side;
   bool get isTaken => takenDateTime != null;
+  @MappableField(
+      key: 'moleculeJson') // TODO rename fields in db to match mapper
   final Molecule molecule;
+  @MappableField(key: 'administrationRouteName')
   final AdministrationRoute administrationRoute;
+  @MappableField(key: 'esterName')
   final Ester? ester;
+  final int? supplyItemId;
+  final String? notes;
 
   MedicationIntake({
     int? id,
     required this.scheduledDateTime,
     required this.dose,
     this.takenDateTime,
+    this.takenTimeZone,
     this.scheduleId,
     this.side,
     required this.molecule,
     required this.administrationRoute,
     this.ester,
-  }) : id = id ?? DateTime.now().millisecondsSinceEpoch;
-
-  factory MedicationIntake.fromMap(Map<String, Object?> map) {
-    return MedicationIntake(
-      id: map['id'] as int?,
-      scheduledDateTime: DateTime.parse(map['scheduledDateTime'] as String),
-      takenDateTime: map['takenDateTime'] == null
-          ? null
-          : DateTime.parse(map['takenDateTime'] as String),
-      dose: Decimal.parse(map['dose'] as String),
-      scheduleId: map['scheduleId'] as int?,
-      side: map['side'] == null
-          ? null
-          : InjectionSide.values.byName(map['side'] as String),
-      molecule: Molecule.fromJson(jsonDecode(map['moleculeJson'] as String)),
-      administrationRoute: AdministrationRoute.fromName(
-          map['administrationRouteName'] as String),
-      ester: Ester.fromName(map['esterName'] as String?),
-    );
+    this.supplyItemId,
+    this.notes,
+  }) : id = id ?? DateTime.now().millisecondsSinceEpoch {
+    if (takenDateTime != null && !takenDateTime!.isUtc) {
+      throw ArgumentError('takenDateTime must be UTC');
+    }
+    if (takenDateTime != null && takenTimeZone == null) {
+      throw ArgumentError('takenTimeZone must be provided');
+    }
   }
 
-  Map<String, Object?> toMap() {
-    return {
-      'id': id,
-      'scheduledDateTime': scheduledDateTime.toIso8601String(),
-      'takenDateTime': takenDateTime?.toIso8601String(),
-      'dose': dose.toString(),
-      'scheduleId': scheduleId,
-      'side': side?.name,
-      'moleculeJson': jsonEncode(molecule.toJson()),
-      'administrationRouteName': administrationRoute.name,
-      'esterName': ester?.name,
-    };
+  DateTime? get takenLocalDateTime {
+    if (takenDateTime == null) return null;
+
+    final location = timeZoneLocation(takenTimeZone!);
+    return tz.TZDateTime.from(takenDateTime!, location);
   }
 
-  MedicationIntake copyWith({
-    int? id,
-    DateTime? scheduledDateTime,
-    DateTime? takenDateTime,
-    Decimal? dose,
-    int? scheduleId,
-    InjectionSide? side,
-    Molecule? molecule,
-    AdministrationRoute? administrationRoute,
-    Ester? ester,
-  }) {
-    return MedicationIntake(
-      id: id ?? this.id,
-      scheduledDateTime: scheduledDateTime ?? this.scheduledDateTime,
-      takenDateTime: takenDateTime ?? this.takenDateTime,
-      dose: dose ?? this.dose,
-      scheduleId: scheduleId ?? this.scheduleId,
-      side: side ?? this.side,
-      molecule: molecule ?? this.molecule,
-      administrationRoute: administrationRoute ?? this.administrationRoute,
-      ester: ester ?? this.ester,
-    );
+  Date? get takenLocalDate {
+    return takenLocalDateTime?.toDate;
   }
 
-  static String? validateDose(String? value) =>
-      requiredStrictlyPositiveDecimal(value);
+  // coverage:ignore-start
+  static String? validateDose(AppLocalizations l10n, String? value) =>
+      requiredStrictlyPositiveDecimal(l10n, value);
+
+  static String? validateDeadSpace(AppLocalizations l10n, String? value) =>
+      positiveDecimal(l10n, value);
+  // coverage:ignore-end
+}
+
+class MoleculeJsonMapper extends SimpleMapper<Molecule> {
+  const MoleculeJsonMapper();
 
   @override
-  bool operator ==(Object other) =>
-      identical(this, other) || other is MedicationIntake && id == other.id;
+  Molecule decode(Object value) {
+    if (value is String) {
+      return Molecule.fromJson(
+        jsonDecode(value) as Map<String, dynamic>,
+      );
+    }
+    if (value is Map) {
+      return Molecule.fromJson(Map<String, dynamic>.from(value));
+    }
+    throw FormatException(
+        'Expected JSON for molecule, got ${value.runtimeType}');
+  }
 
   @override
-  int get hashCode => id.hashCode;
+  Object? encode(Molecule self) {
+    return jsonEncode(self.toJson());
+  }
+}
+
+class AdministrationRouteNameMapper extends SimpleMapper<AdministrationRoute> {
+  const AdministrationRouteNameMapper();
 
   @override
-  String toString() {
-    return "$dose mg • ${molecule.name} "
-        "${ester != null ? '${ester!.name} ' : ""}"
-        "${administrationRoute.name}"
-        "${side?.name != null ? ' • ${side!.name} side' : ''}";
+  AdministrationRoute decode(Object value) {
+    return AdministrationRoute.fromName(value as String);
+  }
+
+  @override
+  Object? encode(AdministrationRoute self) {
+    return self.name;
+  }
+}
+
+class EsterNameMapper extends SimpleMapper<Ester> {
+  const EsterNameMapper();
+
+  @override
+  Ester decode(Object value) {
+    return Ester.fromName(value as String)!;
+  }
+
+  @override
+  Object? encode(Ester self) {
+    return self.name;
+  }
+}
+
+class DecimalStringMapper extends SimpleMapper<Decimal> {
+  const DecimalStringMapper();
+
+  @override
+  Decimal decode(Object value) {
+    return (value as String).toDecimal;
+  }
+
+  @override
+  Object? encode(Decimal self) {
+    return self.toString();
   }
 }

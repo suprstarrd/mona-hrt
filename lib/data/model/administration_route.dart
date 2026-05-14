@@ -14,7 +14,7 @@ class AdministrationRoute {
 
   static const injection = AdministrationRoute(
     name: 'injection',
-    unit: 'ml',
+    unit: 'mL',
     icon: Symbols.syringe,
   );
   static const oral = AdministrationRoute(
@@ -47,10 +47,15 @@ class AdministrationRoute {
     unit: 'suppository',
     icon: Symbols.pill,
   );
-  static const transdermal = AdministrationRoute(
+  static const transdermalSpray = AdministrationRoute(
     name: 'transdermal spray',
     unit: 'spray',
     icon: Symbols.fragrance,
+  );
+  static const transdermalDrops = AdministrationRoute(
+    name: 'transdermal drops',
+    unit: 'mL',
+    icon: Symbols.colorize,
   );
 
   static const List<AdministrationRoute> all = [
@@ -61,23 +66,13 @@ class AdministrationRoute {
     gel,
     implant,
     suppository,
-    transdermal,
+    transdermalSpray,
+    transdermalDrops,
   ];
 
   static AdministrationRoute fromName(String name) {
     return all.firstWhere((route) => route.name == name);
   }
-
-  static List<DropdownMenuItem<AdministrationRoute>> get menuItems => all
-      .map(
-        (route) => DropdownMenuItem<AdministrationRoute>(
-          value: route,
-          child: Text(
-            route.name[0].toUpperCase() + route.name.substring(1),
-          ),
-        ),
-      )
-      .toList();
 
   @override
   bool operator ==(Object other) =>
