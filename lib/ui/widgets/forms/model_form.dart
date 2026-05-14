@@ -8,6 +8,7 @@ class ModelForm extends StatelessWidget {
   final IconData? avatar;
   final List<Widget> fields;
   final VoidCallback? onDelete;
+  final VoidCallback? closeAll;
   final bool isFormValid;
   final VoidCallback saveChanges;
   final String submitButtonLabel;
@@ -17,6 +18,7 @@ class ModelForm extends StatelessWidget {
     this.avatar,
     required this.fields,
     this.onDelete,
+    this.closeAll,
     required this.isFormValid,
     required this.saveChanges,
     required this.submitButtonLabel,
@@ -29,6 +31,13 @@ class ModelForm extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: Text(title),
+        actions: [
+          if (closeAll != null)
+            IconButton(
+              icon: const Icon(Icons.close),
+              onPressed: closeAll,
+            ),
+        ],
       ),
       body: SafeArea(
         child: DismissKeyboardSingleChildScrollView(

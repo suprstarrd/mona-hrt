@@ -5,7 +5,7 @@ import 'package:mona/l10n/build_context_extensions.dart';
 import 'package:mona/l10n/helpers/medication_schedule_l10n.dart';
 import 'package:mona/ui/views/home/settings/schedules/edit_schedule/edit_schedule_page.dart';
 import 'package:provider/provider.dart';
-import 'new_schedule_page.dart';
+import 'new_schedule_main_info_page.dart';
 
 class SchedulesPage extends StatelessWidget {
   @override
@@ -66,7 +66,7 @@ class SchedulesPage extends StatelessWidget {
         onPressed: () {
           Navigator.of(context).push(MaterialPageRoute<void>(
             fullscreenDialog: true,
-            builder: (context) => NewSchedulePage(),
+            builder: (context) => const NewScheduleMainInfoPage(),
           ));
         },
         tooltip: localizations.addSchedule,

@@ -51,11 +51,14 @@ class _EditScheduleNotificationsPageState
 
     if (widget.isNewSchedule) {
       _medicationScheduleProvider.add(updatedSchedule);
-      Navigator.pop(context);
-    } else {
-      _medicationScheduleProvider.updateSchedule(updatedSchedule);
+      Navigator.of(context)
+        ..pop()
+        ..pop()
+        ..pop();
+      return;
     }
 
+    _medicationScheduleProvider.updateSchedule(updatedSchedule);
     Navigator.pop(context);
   }
 
