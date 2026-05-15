@@ -6,6 +6,7 @@ import 'package:mockito/mockito.dart';
 import 'package:mona/controllers/schedule_manager.dart';
 import 'package:mona/data/model/administration_route.dart';
 import 'package:mona/data/model/date.dart';
+import 'package:mona/data/model/medication_intake.dart';
 import 'package:mona/data/model/medication_schedule.dart';
 import 'package:mona/data/model/molecule.dart';
 import 'package:mona/data/model/scheduling_strategy.dart';
@@ -139,6 +140,35 @@ void main() {
 
       expect(slot.schedule, todayTakenSchedule);
       expect(slot.status, ScheduleStatus.taken);
+    });
+
+    test('taken interval slot carries the latest taken intake', () {
+      final intake = MedicationIntake(
+        id: 999,
+        dose: Decimal.one,
+        takenDateTime: DateTime.utc(2025, 9, 14, 12),
+        takenTimeZone: 'Etc/UTC',
+        scheduleId: 5,
+        molecule: KnownMolecules.estradiol,
+        administrationRoute: AdministrationRoute.oral,
+      );
+      when(mockScheduleProvider.schedules).thenReturn([todayTakenSchedule]);
+      when(mockIntakeProvider.getLastTakenIntakeForSchedule(5))
+          .thenReturn(intake);
+
+      final slot = manager.getSlots().single;
+
+      expect(slot.intake, intake);
+    });
+
+    test('non-taken interval slot has no intake attached', () {
+      when(mockScheduleProvider.schedules).thenReturn([todaySchedule]);
+
+      final slot = manager.getSlots().single;
+
+      expect(slot.status, ScheduleStatus.today);
+      expect(slot.intake, isNull);
+      verifyNever(mockIntakeProvider.getLastTakenIntakeForSchedule(any));
     });
 
     test('schedule due today and late yields todayOverdue', () {
@@ -279,6 +309,19 @@ void main() {
 
     late MedicationSchedule dailySchedule;
 
+    MedicationIntake intakeAt(TimeOfDay time, {int id = 0}) {
+      return MedicationIntake(
+        id: id,
+        dose: Decimal.one,
+        takenDateTime: DateTime.utc(2025, 9, 14, time.hour, time.minute),
+        takenTimeZone: 'Etc/UTC',
+        scheduleId: 100,
+        molecule: KnownMolecules.estradiol,
+        administrationRoute: AdministrationRoute.oral,
+        scheduledTime: time,
+      );
+    }
+
     setUp(() {
       dailySchedule = MedicationSchedule(
         id: 100,
@@ -296,9 +339,8 @@ void main() {
 
     test('emits one slot per intakeTime, all today when none taken', () {
       when(mockScheduleProvider.schedules).thenReturn([dailySchedule]);
-      when(mockIntakeProvider.getTakenScheduledTimesForScheduleOn(
-              100, Date.today()))
-          .thenReturn(<TimeOfDay>{});
+      when(mockIntakeProvider.getTakenIntakesForScheduleOn(100, Date.today()))
+          .thenReturn(<MedicationIntake>[]);
 
       final slots = manager.getSlots();
 
@@ -309,13 +351,15 @@ void main() {
         everyElement(ScheduleStatus.today),
       );
       expect(slots.map((s) => s.schedule), everyElement(dailySchedule));
+      expect(slots.map((s) => s.intake), everyElement(isNull));
     });
 
-    test('marks slot as taken when its time is in todays taken set', () {
+    test('marks slot as taken and attaches the matching intake', () {
+      final morningIntake = intakeAt(morning, id: 1);
+      final eveningIntake = intakeAt(evening, id: 2);
       when(mockScheduleProvider.schedules).thenReturn([dailySchedule]);
-      when(mockIntakeProvider.getTakenScheduledTimesForScheduleOn(
-              100, Date.today()))
-          .thenReturn({morning, evening});
+      when(mockIntakeProvider.getTakenIntakesForScheduleOn(100, Date.today()))
+          .thenReturn([morningIntake, eveningIntake]);
 
       final slots = manager.getSlots();
 
@@ -325,6 +369,14 @@ void main() {
           morning: ScheduleStatus.taken,
           afternoon: ScheduleStatus.today,
           evening: ScheduleStatus.taken,
+        },
+      );
+      expect(
+        {for (final s in slots) s.time: s.intake},
+        {
+          morning: morningIntake,
+          afternoon: null,
+          evening: eveningIntake,
         },
       );
     });
@@ -345,9 +397,8 @@ void main() {
         administrationRoute: AdministrationRoute.oral,
       );
       when(mockScheduleProvider.schedules).thenReturn([unsorted]);
-      when(mockIntakeProvider.getTakenScheduledTimesForScheduleOn(
-              101, Date.today()))
-          .thenReturn(<TimeOfDay>{});
+      when(mockIntakeProvider.getTakenIntakesForScheduleOn(101, Date.today()))
+          .thenReturn(<MedicationIntake>[]);
 
       final split = manager.splitSlotsByDay();
 
@@ -372,9 +423,8 @@ void main() {
       );
       when(mockIntakeProvider.getLastIntakeLocalDateForSchedule(200))
           .thenReturn(Date.today().subtract(const Duration(days: 4)));
-      when(mockIntakeProvider.getTakenScheduledTimesForScheduleOn(
-              100, Date.today()))
-          .thenReturn(<TimeOfDay>{});
+      when(mockIntakeProvider.getTakenIntakesForScheduleOn(100, Date.today()))
+          .thenReturn(<MedicationIntake>[]);
       when(mockScheduleProvider.schedules)
           .thenReturn([dailySchedule, overdueInterval]);
 

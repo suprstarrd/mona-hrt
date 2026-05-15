@@ -11,6 +11,7 @@ import 'package:mona/l10n/app_localizations.dart';
 import 'package:mona/l10n/build_context_extensions.dart';
 import 'package:mona/l10n/helpers/molecule_l10n.dart';
 import 'package:mona/ui/views/home/take_medication_page.dart';
+import 'package:mona/ui/views/intakes/edit_intake_page.dart';
 import 'package:provider/provider.dart';
 
 class IntakeTile extends StatelessWidget {
@@ -51,13 +52,16 @@ class IntakeTile extends StatelessWidget {
       margin: const EdgeInsets.symmetric(vertical: 4),
       child: InkWell(
         onTap: () {
+          final intake = slot.intake;
           Navigator.of(context).push(
             MaterialPageRoute<void>(
               fullscreenDialog: true,
-              builder: (context) => TakeMedicationPage(
-                schedule,
-                scheduledTime: slot.time,
-              ),
+              builder: (context) => intake != null
+                  ? EditIntakePage(intake)
+                  : TakeMedicationPage(
+                      schedule,
+                      scheduledTime: slot.time,
+                    ),
             ),
           );
         },

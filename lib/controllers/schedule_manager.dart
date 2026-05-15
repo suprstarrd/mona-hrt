@@ -1,5 +1,7 @@
+import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:mona/data/model/date.dart';
+import 'package:mona/data/model/medication_intake.dart';
 import 'package:mona/data/model/medication_schedule.dart';
 import 'package:mona/data/model/scheduling_strategy.dart';
 import 'package:mona/data/providers/medication_intake_provider.dart';
@@ -9,11 +11,13 @@ class ScheduleSlot {
   final MedicationSchedule schedule;
   final ScheduleStatus status;
   final TimeOfDay? time;
+  final MedicationIntake? intake;
 
   ScheduleSlot({
     required this.schedule,
     required this.status,
     this.time,
+    this.intake,
   });
 }
 
@@ -30,19 +34,28 @@ class ScheduleManager {
     for (final schedule in _medicationScheduleProvider.schedules) {
       switch (schedule.scheduling) {
         case IntervalDaysSchedule s:
+          final status =
+              s.statusFor(schedule.startDate, _lastTakenFor(schedule));
           slots.add(ScheduleSlot(
             schedule: schedule,
-            status: s.statusFor(schedule.startDate, _lastTakenFor(schedule)),
+            status: status,
             time: null,
+            intake: status == ScheduleStatus.taken
+                ? _medicationIntakeProvider
+                    .getLastTakenIntakeForSchedule(schedule.id)
+                : null,
           ));
         case DailySchedule s:
-          final taken = _medicationIntakeProvider
-              .getTakenScheduledTimesForScheduleOn(schedule.id, today);
+          final todaysIntakes = _medicationIntakeProvider
+              .getTakenIntakesForScheduleOn(schedule.id, today);
           for (final time in s.intakeTimes) {
+            final match =
+                todaysIntakes.firstWhereOrNull((i) => i.scheduledTime == time);
             slots.add(ScheduleSlot(
               schedule: schedule,
-              status: s.statusFor(taken: taken.contains(time)),
+              status: s.statusFor(taken: match != null),
               time: time,
+              intake: match,
             ));
           }
       }

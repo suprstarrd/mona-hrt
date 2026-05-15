@@ -123,13 +123,18 @@ class MedicationIntakeProvider extends ChangeNotifier {
     return getLastIntakeLocalDateFromList(scheduleIntakes);
   }
 
-  Set<TimeOfDay> getTakenScheduledTimesForScheduleOn(
+  List<MedicationIntake> getTakenIntakesForScheduleOn(
       int scheduleId, Date date) {
     return getTakenIntakesForSchedule(scheduleId)
-        .where((intake) =>
-            intake.scheduledTime != null && intake.takenLocalDate == date)
-        .map((intake) => intake.scheduledTime!)
-        .toSet();
+        .where((intake) => intake.takenLocalDate == date)
+        .toList();
+  }
+
+  MedicationIntake? getLastTakenIntakeForSchedule(int scheduleId) {
+    final scheduleIntakes = getTakenIntakesForSchedule(scheduleId);
+    if (scheduleIntakes.isEmpty) return null;
+    return scheduleIntakes
+        .reduce((a, b) => a.takenDateTime!.isAfter(b.takenDateTime!) ? a : b);
   }
 
   MedicationIntake? getLastTakenIntake() {
