@@ -4,6 +4,7 @@ import 'package:material_symbols_icons/symbols.dart';
 import 'package:mona/controllers/schedule_manager.dart';
 import 'package:mona/data/model/date.dart';
 import 'package:mona/data/model/medication_schedule.dart';
+import 'package:mona/data/model/scheduling_strategy.dart';
 import 'package:mona/data/providers/medication_intake_provider.dart';
 import 'package:mona/data/providers/supply_item_provider.dart';
 import 'package:mona/l10n/app_localizations.dart';
@@ -127,9 +128,13 @@ class IntakeTileViewModel {
   final AppLocalizations localizations;
   final String languageTag;
 
-  Date get nextScheduled => schedule.nextDate;
+  IntervalDaysSchedule get _intervalScheduling =>
+      schedule.scheduling as IntervalDaysSchedule;
 
-  Date? get lastScheduled => schedule.previousDate;
+  Date get nextScheduled => _intervalScheduling.nextDate(schedule.startDate);
+
+  Date? get lastScheduled =>
+      _intervalScheduling.previousDate(schedule.startDate);
 
   Date? get lastTaken =>
       intakeProvider.getLastIntakeLocalDateForSchedule(schedule.id);

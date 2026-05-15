@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:mona/data/model/medication_schedule.dart';
+import 'package:mona/data/model/scheduling_strategy.dart';
 import 'package:mona/data/providers/medication_schedule_provider.dart';
 import 'package:mona/l10n/build_context_extensions.dart';
 import 'package:mona/ui/constants/dimensions.dart';
@@ -19,34 +20,31 @@ class EditScheduleNotificationsPage extends StatefulWidget {
 
 class _EditScheduleNotificationsPageState
     extends State<EditScheduleNotificationsPage> {
-  late List<TimeOfDay> _notificationTimes;
+  late IntervalDaysSchedule _scheduling;
+  TimeOfDay? _notificationTime;
   late MedicationScheduleProvider _medicationScheduleProvider;
 
   Future<void> _pickTime() async {
     final picked = await showTimePicker(
       context: context,
-      initialTime: TimeOfDay.now(),
+      initialTime: _notificationTime ?? TimeOfDay.now(),
     );
 
     if (picked != null) {
-      final alreadyExists = _notificationTimes.any(
-        (time) => time.hour == picked.hour && time.minute == picked.minute,
-      );
-
-      if (!alreadyExists) {
-        setState(() {
-          _notificationTimes.add(picked);
-          _notificationTimes.sort((a, b) => a.compareTo(b));
-        });
-      }
+      setState(() {
+        _notificationTime = picked;
+      });
     }
   }
 
-  void _savechanges() {
+  void _saveChanges() {
     if (!mounted) return;
 
     final updatedSchedule = widget.schedule.copyWith(
-      notificationTimes: _notificationTimes,
+      scheduling: IntervalDaysSchedule(
+        intervalDays: _scheduling.intervalDays,
+        notificationTime: _notificationTime,
+      ),
     );
 
     if (widget.isNewSchedule) {
@@ -65,7 +63,8 @@ class _EditScheduleNotificationsPageState
   @override
   void initState() {
     super.initState();
-    _notificationTimes = widget.schedule.notificationTimes.toList();
+    _scheduling = widget.schedule.scheduling as IntervalDaysSchedule;
+    _notificationTime = _scheduling.notificationTime;
     _medicationScheduleProvider =
         Provider.of<MedicationScheduleProvider>(context, listen: false);
   }
@@ -94,19 +93,21 @@ class _EditScheduleNotificationsPageState
           Padding(
             padding: const EdgeInsets.only(right: 16.0),
             child: TextButton(
-              onPressed: _savechanges,
+              onPressed: _saveChanges,
               child: Text(localizations.save),
             ),
           ),
         ],
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _pickTime,
-        tooltip: localizations.addNotification,
-        child: Icon(Icons.add),
-      ),
+      floatingActionButton: _notificationTime == null
+          ? FloatingActionButton(
+              onPressed: _pickTime,
+              tooltip: localizations.addNotification,
+              child: Icon(Icons.add),
+            )
+          : null,
       resizeToAvoidBottomInset: false,
-      body: _notificationTimes.isEmpty
+      body: _notificationTime == null
           ? Center(
               child: Padding(
                 padding: pagePadding,
@@ -118,23 +119,26 @@ class _EditScheduleNotificationsPageState
               ),
             )
           : SafeArea(
-              child: ListView.builder(
-                itemCount: _notificationTimes.length,
-                itemBuilder: (context, index) {
-                  final time = _notificationTimes[index];
-                  return ListTile(
-                    title: Text(time.format(context)),
-                    leading: Icon(Icons.alarm),
-                    trailing: IconButton(
+              child: ListTile(
+                title: Text(_notificationTime!.format(context)),
+                leading: Icon(Icons.alarm),
+                trailing: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    IconButton(
+                      icon: const Icon(Icons.edit_outlined),
+                      onPressed: _pickTime,
+                    ),
+                    IconButton(
                       icon: const Icon(Icons.delete_outline),
                       onPressed: () {
                         setState(() {
-                          _notificationTimes.removeAt(index);
+                          _notificationTime = null;
                         });
                       },
                     ),
-                  );
-                },
+                  ],
+                ),
               ),
             ),
     );

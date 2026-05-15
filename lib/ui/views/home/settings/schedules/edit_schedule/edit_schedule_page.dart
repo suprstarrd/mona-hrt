@@ -1,6 +1,7 @@
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:mona/data/model/medication_schedule.dart';
+import 'package:mona/data/model/scheduling_strategy.dart';
 import 'package:mona/data/providers/medication_schedule_provider.dart';
 import 'package:mona/l10n/build_context_extensions.dart';
 import 'package:mona/l10n/helpers/medication_schedule_l10n.dart';
@@ -28,6 +29,10 @@ class EditSchedulePage extends StatelessWidget {
       return SizedBox.shrink();
     }
 
+    final scheduling = currentSchedule.scheduling;
+    final notificationTime =
+        scheduling is IntervalDaysSchedule ? scheduling.notificationTime : null;
+
     return Scaffold(
       appBar: AppBar(
         title: Text(currentSchedule.name),
@@ -51,16 +56,9 @@ class EditSchedulePage extends StatelessWidget {
           ),
           ListTile(
             title: Text(localizations.notifications),
-            subtitle: currentSchedule.notificationTimes.isEmpty
+            subtitle: notificationTime == null
                 ? Text(localizations.noNotifications)
-                : currentSchedule.notificationTimes.length > 4
-                    ? Text(localizations.notificationsCount(
-                        currentSchedule.notificationTimes.length))
-                    : Text(
-                        currentSchedule.notificationTimes
-                            .map((time) => time.format(context))
-                            .join(', '),
-                      ),
+                : Text(notificationTime.format(context)),
             trailing: Icon(Icons.chevron_right),
             onTap: () {
               Navigator.of(context).push(MaterialPageRoute<void>(

@@ -5,6 +5,7 @@ import 'package:mona/data/model/date.dart';
 import 'package:mona/data/model/ester.dart';
 import 'package:mona/data/model/medication_schedule.dart';
 import 'package:mona/data/model/molecule.dart';
+import 'package:mona/data/model/scheduling_strategy.dart';
 import 'package:mona/l10n/build_context_extensions.dart';
 import 'package:mona/ui/views/home/settings/schedules/edit_schedule/edit_schedule_notifications_page.dart';
 import 'package:mona/ui/widgets/forms/form_date_field.dart';
@@ -37,7 +38,7 @@ class _NewScheduleSchedulingPageState extends State<NewScheduleSchedulingPage> {
   late TextEditingController _intervalDaysController;
   late Date _startDate;
 
-  String? get _intervalDaysError => MedicationSchedule.validateIntervalDays(
+  String? get _intervalDaysError => IntervalDaysSchedule.validateIntervalDays(
       context.l10n, _intervalDaysController.text);
   String? get _startDateError =>
       MedicationSchedule.validateStartDate(context.l10n, _startDate);
@@ -61,12 +62,11 @@ class _NewScheduleSchedulingPageState extends State<NewScheduleSchedulingPage> {
     final schedule = MedicationSchedule(
       name: widget.name,
       dose: widget.dose,
-      intervalDays: intervalDays,
+      scheduling: IntervalDaysSchedule(intervalDays: intervalDays),
       startDate: _startDate,
       molecule: widget.molecule,
       administrationRoute: widget.administrationRoute,
       ester: widget.ester,
-      notificationTimes: List.empty(),
     );
 
     if (!mounted) return;

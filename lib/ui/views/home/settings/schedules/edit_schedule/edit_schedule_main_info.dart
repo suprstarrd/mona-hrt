@@ -4,6 +4,7 @@ import 'package:mona/data/model/date.dart';
 import 'package:mona/data/model/ester.dart';
 import 'package:mona/data/model/medication_schedule.dart';
 import 'package:mona/data/model/molecule.dart';
+import 'package:mona/data/model/scheduling_strategy.dart';
 import 'package:mona/data/providers/medication_schedule_provider.dart';
 import 'package:mona/l10n/build_context_extensions.dart';
 import 'package:mona/services/preferences_service.dart';
@@ -44,7 +45,7 @@ class _EditScheduleMainInfoPageState extends State<EditScheduleMainInfoPage> {
       MedicationSchedule.validateName(context.l10n, _nameController.text);
   String? get _doseError =>
       MedicationSchedule.validateDose(context.l10n, _doseController.text);
-  String? get _intervalDaysError => MedicationSchedule.validateIntervalDays(
+  String? get _intervalDaysError => IntervalDaysSchedule.validateIntervalDays(
       context.l10n, _intervalDaysController.text);
   String? get _startDateError =>
       MedicationSchedule.validateStartDate(context.l10n, _startDate);
@@ -110,10 +111,15 @@ class _EditScheduleMainInfoPageState extends State<EditScheduleMainInfoPage> {
     if (!_isFormValid) return;
     if (!mounted) return;
 
+    final previous = widget.schedule.scheduling as IntervalDaysSchedule;
+
     final updatedSchedule = widget.schedule.copyWith(
       name: _nameController.text,
       dose: _doseController.text.toDecimal,
-      intervalDays: _intervalDaysController.text.toInt,
+      scheduling: IntervalDaysSchedule(
+        intervalDays: _intervalDaysController.text.toInt,
+        notificationTime: previous.notificationTime,
+      ),
       startDate: _startDate,
       molecule: _molecule,
       administrationRoute: _administrationRoute,
@@ -147,8 +153,10 @@ class _EditScheduleMainInfoPageState extends State<EditScheduleMainInfoPage> {
     _nameController = TextEditingController(text: widget.schedule.name);
     _doseController =
         TextEditingController(text: widget.schedule.dose.toString());
-    _intervalDaysController =
-        TextEditingController(text: widget.schedule.intervalDays.toString());
+    _intervalDaysController = TextEditingController(
+        text: (widget.schedule.scheduling as IntervalDaysSchedule)
+            .intervalDays
+            .toString());
     _startDate = widget.schedule.startDate;
     _molecule = widget.schedule.molecule;
     _administrationRoute = widget.schedule.administrationRoute;
