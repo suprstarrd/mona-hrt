@@ -4,9 +4,10 @@ import 'package:mona/data/model/medication_schedule.dart';
 import 'package:mona/data/model/scheduling_strategy.dart';
 import 'package:mona/data/providers/medication_schedule_provider.dart';
 import 'package:mona/l10n/build_context_extensions.dart';
-import 'package:mona/l10n/helpers/medication_schedule_l10n.dart';
+import 'package:mona/l10n/helpers/administration_route_l10n.dart';
+import 'package:mona/l10n/helpers/molecule_l10n.dart';
 import 'package:mona/ui/views/home/settings/schedules/edit_schedule/edit_schedule_main_info.dart';
-import 'package:mona/ui/views/home/settings/schedules/edit_schedule/edit_schedule_notifications_page.dart';
+import 'package:mona/ui/views/home/settings/schedules/edit_schedule/edit_schedule_scheduling_page.dart';
 import 'package:provider/provider.dart';
 
 class EditSchedulePage extends StatelessWidget {
@@ -29,9 +30,7 @@ class EditSchedulePage extends StatelessWidget {
       return SizedBox.shrink();
     }
 
-    final scheduling = currentSchedule.scheduling;
-    final notificationTime =
-        scheduling is IntervalDaysSchedule ? scheduling.notificationTime : null;
+    final schedulingSubtitle = _schedulingSubtitle(currentSchedule, context);
 
     return Scaffold(
       appBar: AppBar(
@@ -42,12 +41,11 @@ class EditSchedulePage extends StatelessWidget {
           ListTile(
             title: Text(localizations.editScheduleInfo),
             subtitle: Text(
-              currentSchedule.localizedSummary(localizations),
-            ),
-            trailing: Icon(Icons.edit),
+                '${currentSchedule.dose} ${currentSchedule.molecule.unit} • ${currentSchedule.molecule.localizedNameWithEster(currentSchedule.ester, localizations)} • '
+                '${currentSchedule.administrationRoute.localizedName(localizations)}'),
+            trailing: Icon(Icons.chevron_right),
             onTap: () {
               Navigator.of(context).push(MaterialPageRoute<void>(
-                fullscreenDialog: true,
                 builder: (context) => EditScheduleMainInfoPage(
                   schedule: currentSchedule,
                 ),
@@ -55,14 +53,12 @@ class EditSchedulePage extends StatelessWidget {
             },
           ),
           ListTile(
-            title: Text(localizations.notifications),
-            subtitle: notificationTime == null
-                ? Text(localizations.noNotifications)
-                : Text(notificationTime.format(context)),
+            title: Text('Scheduling'),
+            subtitle: Text(schedulingSubtitle),
             trailing: Icon(Icons.chevron_right),
             onTap: () {
               Navigator.of(context).push(MaterialPageRoute<void>(
-                builder: (context) => EditScheduleNotificationsPage(
+                builder: (context) => EditScheduleSchedulingPage(
                   schedule: currentSchedule,
                 ),
               ));
@@ -71,5 +67,21 @@ class EditSchedulePage extends StatelessWidget {
         ],
       ),
     );
+  }
+
+  String _schedulingSubtitle(
+    MedicationSchedule schedule,
+    BuildContext context,
+  ) {
+    final localizations = context.l10n;
+    return switch (schedule.scheduling) {
+      IntervalDaysSchedule(
+        intervalDays: final intervalDays,
+      ) =>
+        intervalDays == 1
+            ? localizations.scheduleFrequencyDaily
+            : localizations.scheduleFrequencyEveryNDays(intervalDays),
+      DailySchedule _ => localizations.scheduleFrequencyDaily,
+    };
   }
 }
