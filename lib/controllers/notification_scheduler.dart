@@ -1,5 +1,6 @@
 import 'package:intl/intl.dart';
 import 'package:mona/data/model/medication_schedule.dart';
+import 'package:mona/data/model/scheduling_strategy.dart';
 import 'package:mona/data/providers/medication_intake_provider.dart';
 import 'package:mona/data/providers/medication_schedule_provider.dart';
 import 'package:mona/l10n/app_localizations.dart';
@@ -22,27 +23,31 @@ class NotificationScheduler {
     final now = DateTime.now();
 
     for (final schedule in medicationScheduleProvider.schedules) {
+      final scheduling = schedule.scheduling;
+      if (scheduling is! IntervalDaysSchedule) continue;
+
+      final time = scheduling.notificationTime;
+      if (time == null) continue;
+
       final lastTaken = medicationIntakeProvider
           .getLastIntakeLocalDateForSchedule(schedule.id);
-      final nextDates = schedule.getNextDates(5);
+      final nextDates = scheduling.getNextDates(schedule.startDate, 5);
 
       for (final date in nextDates) {
-        for (final time in schedule.notificationTimes) {
-          final dateTime = DateTime(
-            date.year,
-            date.month,
-            date.day,
-            time.hour,
-            time.minute,
-          );
+        final dateTime = DateTime(
+          date.year,
+          date.month,
+          date.day,
+          time.hour,
+          time.minute,
+        );
 
-          if (now.isAfter(dateTime)) continue;
-          if (date.isToday && schedule.isTakenTodayOrLater(lastTaken)) {
-            continue;
-          }
-
-          notificationsToSchedule[dateTime] = schedule;
+        if (now.isAfter(dateTime)) continue;
+        if (date.isToday && scheduling.isTakenTodayOrLater(lastTaken)) {
+          continue;
         }
+
+        notificationsToSchedule[dateTime] = schedule;
       }
     }
 

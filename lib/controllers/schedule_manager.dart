@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:mona/data/model/date.dart';
 import 'package:mona/data/model/medication_schedule.dart';
+import 'package:mona/data/model/scheduling_strategy.dart';
 import 'package:mona/data/providers/medication_intake_provider.dart';
 import 'package:mona/data/providers/medication_schedule_provider.dart';
 
@@ -24,13 +25,19 @@ class ScheduleManager {
       this._medicationScheduleProvider, this._medicationIntakeProvider);
 
   List<ScheduleSlot> getSlots() {
-    return _medicationScheduleProvider.schedules
-        .map((schedule) => ScheduleSlot(
-              schedule: schedule,
-              status: schedule.statusFor(_lastTakenFor(schedule)),
-              time: null,
-            ))
-        .toList();
+    final slots = <ScheduleSlot>[];
+    for (final schedule in _medicationScheduleProvider.schedules) {
+      final scheduling = schedule.scheduling;
+      if (scheduling is! IntervalDaysSchedule) continue;
+
+      slots.add(ScheduleSlot(
+        schedule: schedule,
+        status:
+            scheduling.statusFor(schedule.startDate, _lastTakenFor(schedule)),
+        time: null,
+      ));
+    }
+    return slots;
   }
 
   ({List<ScheduleSlot> today, List<ScheduleSlot> upcoming}) splitSlotsByDay() {
