@@ -11,6 +11,7 @@ import 'package:mona/data/model/medication_intake.dart';
 import 'package:mona/data/model/medication_schedule.dart';
 import 'package:mona/data/model/medication_supply_item.dart';
 import 'package:mona/data/model/molecule.dart';
+import 'package:mona/data/model/scheduling_strategy.dart';
 import 'package:mona/data/providers/medication_intake_provider.dart';
 import 'package:mona/data/providers/supply_item_provider.dart';
 
@@ -615,11 +616,10 @@ MedicationSchedule _buildSchedule({
     id: id,
     name: 'ScheduleSingle',
     dose: dose ?? Decimal.parse('2'),
-    intervalDays: 1,
+    scheduling: IntervalDaysSchedule(intervalDays: 1),
     molecule: KnownMolecules.estradiol,
     administrationRoute: administrationRoute,
     ester: ester,
-    notificationTimes: List.empty(),
   );
 }
 

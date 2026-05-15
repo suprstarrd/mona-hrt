@@ -7,6 +7,7 @@ import 'package:mona/data/model/administration_route.dart';
 import 'package:mona/data/model/date.dart';
 import 'package:mona/data/model/medication_schedule.dart';
 import 'package:mona/data/model/molecule.dart';
+import 'package:mona/data/model/scheduling_strategy.dart';
 import 'package:mona/data/providers/medication_intake_provider.dart';
 import 'package:mona/data/providers/medication_schedule_provider.dart';
 
@@ -46,11 +47,10 @@ void main() {
         id: 1,
         name: 'TodayMed',
         dose: Decimal.one,
-        intervalDays: 2,
+        scheduling: IntervalDaysSchedule(intervalDays: 2),
         startDate: today,
         molecule: KnownMolecules.estradiol,
         administrationRoute: AdministrationRoute.oral,
-        notificationTimes: List.empty(),
       );
       when(mockIntakeProvider.getLastIntakeLocalDateForSchedule(1))
           .thenReturn(today.subtract(const Duration(days: 2)));
@@ -59,11 +59,10 @@ void main() {
         id: 5,
         name: 'TodayTakenMed',
         dose: Decimal.one,
-        intervalDays: 2,
+        scheduling: IntervalDaysSchedule(intervalDays: 2),
         startDate: today,
         molecule: KnownMolecules.estradiol,
         administrationRoute: AdministrationRoute.oral,
-        notificationTimes: List.empty(),
       );
       when(mockIntakeProvider.getLastIntakeLocalDateForSchedule(5))
           .thenReturn(today);
@@ -72,11 +71,10 @@ void main() {
         id: 4,
         name: 'TodayLateMed',
         dose: Decimal.one,
-        intervalDays: 2,
+        scheduling: IntervalDaysSchedule(intervalDays: 2),
         startDate: today.subtract(const Duration(days: 4)),
         molecule: KnownMolecules.estradiol,
         administrationRoute: AdministrationRoute.oral,
-        notificationTimes: List.empty(),
       );
       when(mockIntakeProvider.getLastIntakeLocalDateForSchedule(4))
           .thenReturn(today.subtract(const Duration(days: 3)));
@@ -85,11 +83,10 @@ void main() {
         id: 6,
         name: 'TodayEarlyMed',
         dose: Decimal.one,
-        intervalDays: 7,
+        scheduling: IntervalDaysSchedule(intervalDays: 7),
         startDate: today.subtract(const Duration(days: 14)),
         molecule: KnownMolecules.estradiol,
         administrationRoute: AdministrationRoute.oral,
-        notificationTimes: List.empty(),
       );
       when(mockIntakeProvider.getLastIntakeLocalDateForSchedule(6))
           .thenReturn(today.subtract(const Duration(days: 5)));
@@ -98,11 +95,10 @@ void main() {
         id: 2,
         name: 'OverdueMed',
         dose: Decimal.one,
-        intervalDays: 2,
+        scheduling: IntervalDaysSchedule(intervalDays: 2),
         startDate: today.subtract(const Duration(days: 9)),
         molecule: KnownMolecules.estradiol,
         administrationRoute: AdministrationRoute.oral,
-        notificationTimes: List.empty(),
       );
       when(mockIntakeProvider.getLastIntakeLocalDateForSchedule(2))
           .thenReturn(today.subtract(const Duration(days: 4)));
@@ -111,11 +107,10 @@ void main() {
         id: 3,
         name: 'UpcomingMed',
         dose: Decimal.one,
-        intervalDays: 2,
+        scheduling: IntervalDaysSchedule(intervalDays: 2),
         startDate: today.add(const Duration(days: 10)),
         molecule: KnownMolecules.estradiol,
         administrationRoute: AdministrationRoute.oral,
-        notificationTimes: List.empty(),
       );
       when(mockIntakeProvider.getLastIntakeLocalDateForSchedule(3))
           .thenReturn(null);
@@ -197,11 +192,10 @@ void main() {
         id: 1,
         name: 'TodayMed',
         dose: Decimal.one,
-        intervalDays: 2,
+        scheduling: IntervalDaysSchedule(intervalDays: 2),
         startDate: today,
         molecule: KnownMolecules.estradiol,
         administrationRoute: AdministrationRoute.oral,
-        notificationTimes: List.empty(),
       );
       when(mockIntakeProvider.getLastIntakeLocalDateForSchedule(1))
           .thenReturn(today.subtract(const Duration(days: 2)));
@@ -210,11 +204,10 @@ void main() {
         id: 2,
         name: 'TakenMed',
         dose: Decimal.one,
-        intervalDays: 2,
+        scheduling: IntervalDaysSchedule(intervalDays: 2),
         startDate: today,
         molecule: KnownMolecules.estradiol,
         administrationRoute: AdministrationRoute.oral,
-        notificationTimes: List.empty(),
       );
       when(mockIntakeProvider.getLastIntakeLocalDateForSchedule(2))
           .thenReturn(today);
@@ -223,11 +216,10 @@ void main() {
         id: 3,
         name: 'OverdueMed',
         dose: Decimal.one,
-        intervalDays: 2,
+        scheduling: IntervalDaysSchedule(intervalDays: 2),
         startDate: today.subtract(const Duration(days: 9)),
         molecule: KnownMolecules.estradiol,
         administrationRoute: AdministrationRoute.oral,
-        notificationTimes: List.empty(),
       );
       when(mockIntakeProvider.getLastIntakeLocalDateForSchedule(3))
           .thenReturn(today.subtract(const Duration(days: 4)));
@@ -236,11 +228,10 @@ void main() {
         id: 4,
         name: 'UpcomingMed',
         dose: Decimal.one,
-        intervalDays: 2,
+        scheduling: IntervalDaysSchedule(intervalDays: 2),
         startDate: today.add(const Duration(days: 10)),
         molecule: KnownMolecules.estradiol,
         administrationRoute: AdministrationRoute.oral,
-        notificationTimes: List.empty(),
       );
       when(mockIntakeProvider.getLastIntakeLocalDateForSchedule(4))
           .thenReturn(null);

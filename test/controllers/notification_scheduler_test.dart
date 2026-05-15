@@ -10,6 +10,7 @@ import 'package:mona/data/model/administration_route.dart';
 import 'package:mona/data/model/date.dart';
 import 'package:mona/data/model/medication_schedule.dart';
 import 'package:mona/data/model/molecule.dart';
+import 'package:mona/data/model/scheduling_strategy.dart';
 import 'package:mona/data/providers/medication_intake_provider.dart';
 import 'package:mona/data/providers/medication_schedule_provider.dart';
 import 'package:mona/l10n/app_localizations_en.dart';
@@ -146,10 +147,9 @@ void main() {
           MedicationSchedule(
             name: 'Test Medication',
             dose: Decimal.fromInt(10),
-            intervalDays: 1,
+            scheduling: IntervalDaysSchedule(intervalDays: 1),
             molecule: KnownMolecules.estradiol,
             administrationRoute: AdministrationRoute.oral,
-            notificationTimes: List.empty(),
           )
         ]);
         when(mockPlugin.zonedSchedule(
@@ -206,10 +206,9 @@ void main() {
             id: scheduleId,
             name: 'Empty Schedule',
             dose: Decimal.fromInt(10),
-            intervalDays: 1,
+            scheduling: IntervalDaysSchedule(intervalDays: 1),
             molecule: KnownMolecules.estradiol,
             administrationRoute: AdministrationRoute.oral,
-            notificationTimes: [],
           )
         ]);
         when(mockMedicationIntakeProvider
@@ -259,10 +258,12 @@ void main() {
             id: scheduleId,
             name: 'Future Schedule',
             dose: Decimal.fromInt(10),
-            intervalDays: 1,
+            scheduling: IntervalDaysSchedule(
+              intervalDays: 1,
+              notificationTime: scheduledTime,
+            ),
             molecule: KnownMolecules.estradiol,
             administrationRoute: AdministrationRoute.oral,
-            notificationTimes: [scheduledTime],
           )
         ]);
         when(mockMedicationIntakeProvider
@@ -323,10 +324,12 @@ void main() {
             id: scheduleId,
             name: 'Past Schedule',
             dose: Decimal.fromInt(10),
-            intervalDays: 1,
+            scheduling: IntervalDaysSchedule(
+              intervalDays: 1,
+              notificationTime: scheduledTime,
+            ),
             molecule: KnownMolecules.estradiol,
             administrationRoute: AdministrationRoute.oral,
-            notificationTimes: [scheduledTime],
           )
         ]);
         when(mockMedicationIntakeProvider
@@ -369,7 +372,7 @@ void main() {
         NotificationService.isPlatformSupported = origPlatformCheck;
       });
 
-      test('Schedule with multiple notification times -> schedule accordingly',
+      test('DailySchedule -> no notifications scheduled (not supported yet)',
           () async {
         // Arrange
         final origPlatformCheck = NotificationService.isPlatformSupported;
@@ -388,12 +391,11 @@ void main() {
         when(mockMedicationScheduleProvider.schedules).thenReturn([
           MedicationSchedule(
             id: scheduleId,
-            name: 'MultiTime Schedule',
+            name: 'Daily Schedule',
             dose: Decimal.fromInt(10),
-            intervalDays: 1,
+            scheduling: DailySchedule(intakeTimes: times),
             molecule: KnownMolecules.estradiol,
             administrationRoute: AdministrationRoute.oral,
-            notificationTimes: times,
           )
         ]);
         when(mockMedicationIntakeProvider
@@ -410,20 +412,7 @@ void main() {
         await scheduler.regenerateAll(l10n, l10n.localeName);
 
         // Assert
-        final checkNow = DateTime.now();
-        int expectedCount = 0;
-        final dates =
-            List.generate(5, (i) => Date.today().add(Duration(days: i)));
-        for (final date in dates) {
-          for (final time in times) {
-            final dateTime = DateTime(
-                date.year, date.month, date.day, time.hour, time.minute);
-            if (!checkNow.isAfter(dateTime)) {
-              expectedCount++;
-            }
-          }
-        }
-        verify(mockPlugin.zonedSchedule(
+        verifyNever(mockPlugin.zonedSchedule(
           id: anyNamed('id'),
           title: anyNamed('title'),
           body: anyNamed('body'),
@@ -431,7 +420,7 @@ void main() {
           notificationDetails: anyNamed('notificationDetails'),
           androidScheduleMode: anyNamed('androidScheduleMode'),
           payload: anyNamed('payload'),
-        )).called(expectedCount);
+        ));
 
         // Cleanup
         NotificationService.createPlugin = origCreate;
@@ -457,12 +446,13 @@ void main() {
             id: scheduleId,
             name: 'Taken Today Schedule',
             dose: Decimal.fromInt(10),
-            intervalDays: 1,
+            scheduling: IntervalDaysSchedule(
+              intervalDays: 1,
+              notificationTime: TimeOfDay.fromDateTime(
+                  DateTime.now().add(Duration(minutes: 1))),
+            ),
             molecule: KnownMolecules.estradiol,
             administrationRoute: AdministrationRoute.oral,
-            notificationTimes: [
-              TimeOfDay.fromDateTime(DateTime.now().add(Duration(minutes: 1)))
-            ],
           )
         ]);
         when(mockPlugin.zonedSchedule(
