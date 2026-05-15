@@ -66,7 +66,7 @@ class MedicationScheduleMapper extends ClassMapperBase<MedicationSchedule> {
   static AdministrationRoute _$administrationRoute(MedicationSchedule v) =>
       v.administrationRoute;
   static const Field<MedicationSchedule, AdministrationRoute>
-      _f$administrationRoute = Field(
+  _f$administrationRoute = Field(
     'administrationRoute',
     _$administrationRoute,
     key: r'administrationRouteName',
@@ -133,9 +133,13 @@ mixin MedicationScheduleMappable {
         .encodeMap<MedicationSchedule>(this as MedicationSchedule);
   }
 
-  MedicationScheduleCopyWith<MedicationSchedule, MedicationSchedule,
-      MedicationSchedule> get copyWith => _MedicationScheduleCopyWithImpl<
-          MedicationSchedule, MedicationSchedule>(
+  MedicationScheduleCopyWith<
+    MedicationSchedule,
+    MedicationSchedule,
+    MedicationSchedule
+  >
+  get copyWith =>
+      _MedicationScheduleCopyWithImpl<MedicationSchedule, MedicationSchedule>(
         this as MedicationSchedule,
         $identity,
         $identity,
@@ -166,15 +170,19 @@ mixin MedicationScheduleMappable {
 extension MedicationScheduleValueCopy<$R, $Out>
     on ObjectCopyWith<$R, MedicationSchedule, $Out> {
   MedicationScheduleCopyWith<$R, MedicationSchedule, $Out>
-      get $asMedicationSchedule => $base.as(
-            (v, t, t2) => _MedicationScheduleCopyWithImpl<$R, $Out>(v, t, t2),
-          );
+  get $asMedicationSchedule => $base.as(
+    (v, t, t2) => _MedicationScheduleCopyWithImpl<$R, $Out>(v, t, t2),
+  );
 }
 
-abstract class MedicationScheduleCopyWith<$R, $In extends MedicationSchedule,
-    $Out> implements ClassCopyWith<$R, $In, $Out> {
+abstract class MedicationScheduleCopyWith<
+  $R,
+  $In extends MedicationSchedule,
+  $Out
+>
+    implements ClassCopyWith<$R, $In, $Out> {
   ListCopyWith<$R, TimeOfDay, ObjectCopyWith<$R, TimeOfDay, TimeOfDay>>
-      get notificationTimes;
+  get notificationTimes;
   $R call({
     int? id,
     String? name,
@@ -201,11 +209,11 @@ class _MedicationScheduleCopyWithImpl<$R, $Out>
       MedicationScheduleMapper.ensureInitialized();
   @override
   ListCopyWith<$R, TimeOfDay, ObjectCopyWith<$R, TimeOfDay, TimeOfDay>>
-      get notificationTimes => ListCopyWith(
-            $value.notificationTimes,
-            (v, t) => ObjectCopyWith(v, $identity, t),
-            (v) => call(notificationTimes: v),
-          );
+  get notificationTimes => ListCopyWith(
+    $value.notificationTimes,
+    (v, t) => ObjectCopyWith(v, $identity, t),
+    (v) => call(notificationTimes: v),
+  );
   @override
   $R call({
     Object? id = $none,
@@ -217,43 +225,42 @@ class _MedicationScheduleCopyWithImpl<$R, $Out>
     AdministrationRoute? administrationRoute,
     Object? ester = $none,
     List<TimeOfDay>? notificationTimes,
-  }) =>
-      $apply(
-        FieldCopyWithData({
-          if (id != $none) #id: id,
-          if (name != null) #name: name,
-          if (dose != null) #dose: dose,
-          if (intervalDays != null) #intervalDays: intervalDays,
-          if (startDate != $none) #startDate: startDate,
-          if (molecule != null) #molecule: molecule,
-          if (administrationRoute != null)
-            #administrationRoute: administrationRoute,
-          if (ester != $none) #ester: ester,
-          if (notificationTimes != null) #notificationTimes: notificationTimes,
-        }),
-      );
+  }) => $apply(
+    FieldCopyWithData({
+      if (id != $none) #id: id,
+      if (name != null) #name: name,
+      if (dose != null) #dose: dose,
+      if (intervalDays != null) #intervalDays: intervalDays,
+      if (startDate != $none) #startDate: startDate,
+      if (molecule != null) #molecule: molecule,
+      if (administrationRoute != null)
+        #administrationRoute: administrationRoute,
+      if (ester != $none) #ester: ester,
+      if (notificationTimes != null) #notificationTimes: notificationTimes,
+    }),
+  );
   @override
   MedicationSchedule $make(CopyWithData data) => MedicationSchedule(
-        id: data.get(#id, or: $value.id),
-        name: data.get(#name, or: $value.name),
-        dose: data.get(#dose, or: $value.dose),
-        intervalDays: data.get(#intervalDays, or: $value.intervalDays),
-        startDate: data.get(#startDate, or: $value.startDate),
-        molecule: data.get(#molecule, or: $value.molecule),
-        administrationRoute: data.get(
-          #administrationRoute,
-          or: $value.administrationRoute,
-        ),
-        ester: data.get(#ester, or: $value.ester),
-        notificationTimes: data.get(
-          #notificationTimes,
-          or: $value.notificationTimes,
-        ),
-      );
+    id: data.get(#id, or: $value.id),
+    name: data.get(#name, or: $value.name),
+    dose: data.get(#dose, or: $value.dose),
+    intervalDays: data.get(#intervalDays, or: $value.intervalDays),
+    startDate: data.get(#startDate, or: $value.startDate),
+    molecule: data.get(#molecule, or: $value.molecule),
+    administrationRoute: data.get(
+      #administrationRoute,
+      or: $value.administrationRoute,
+    ),
+    ester: data.get(#ester, or: $value.ester),
+    notificationTimes: data.get(
+      #notificationTimes,
+      or: $value.notificationTimes,
+    ),
+  );
 
   @override
   MedicationScheduleCopyWith<$R2, MedicationSchedule, $Out2> $chain<$R2, $Out2>(
     Then<$Out2, $R2> t,
-  ) =>
-      _MedicationScheduleCopyWithImpl<$R2, $Out2>($value, $cast, t);
+  ) => _MedicationScheduleCopyWithImpl<$R2, $Out2>($value, $cast, t);
 }
+
