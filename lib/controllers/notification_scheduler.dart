@@ -1,4 +1,5 @@
 import 'package:intl/intl.dart';
+import 'package:mona/data/model/date.dart';
 import 'package:mona/data/model/medication_schedule.dart';
 import 'package:mona/data/model/scheduling_strategy.dart';
 import 'package:mona/data/providers/medication_intake_provider.dart';
@@ -8,6 +9,8 @@ import 'package:mona/services/notification_service.dart';
 import 'package:mona/services/preferences_service.dart';
 
 class NotificationScheduler {
+  static const int _nomberOfDays = 5;
+
   final MedicationScheduleProvider medicationScheduleProvider;
   final MedicationIntakeProvider medicationIntakeProvider;
   final PreferencesService preferencesService;
@@ -23,17 +26,68 @@ class NotificationScheduler {
     final now = DateTime.now();
 
     for (final schedule in medicationScheduleProvider.schedules) {
-      final scheduling = schedule.scheduling;
-      if (scheduling is! IntervalDaysSchedule) continue;
+      switch (schedule.scheduling) {
+        case IntervalDaysSchedule scheduling:
+          _collectIntervalTimes(
+              schedule, scheduling, now, notificationsToSchedule);
+        case DailySchedule scheduling:
+          _collectDailyTimes(
+              schedule, scheduling, now, notificationsToSchedule);
+      }
+    }
 
-      final time = scheduling.notificationTime;
-      if (time == null) continue;
+    return notificationsToSchedule;
+  }
 
-      final lastTaken = medicationIntakeProvider
-          .getLastIntakeLocalDateForSchedule(schedule.id);
-      final nextDates = scheduling.getNextDates(schedule.startDate, 5);
+  void _collectIntervalTimes(
+    MedicationSchedule schedule,
+    IntervalDaysSchedule scheduling,
+    DateTime now,
+    Map<DateTime, MedicationSchedule> out,
+  ) {
+    final time = scheduling.notificationTime;
+    if (time == null) return;
 
-      for (final date in nextDates) {
+    final lastTaken =
+        medicationIntakeProvider.getLastIntakeLocalDateForSchedule(schedule.id);
+    final nextDates =
+        scheduling.getNextDates(schedule.startDate, _nomberOfDays);
+
+    for (final date in nextDates) {
+      final dateTime = DateTime(
+        date.year,
+        date.month,
+        date.day,
+        time.hour,
+        time.minute,
+      );
+
+      if (now.isAfter(dateTime)) continue;
+      if (date.isToday && scheduling.isTakenTodayOrLater(lastTaken)) {
+        continue;
+      }
+
+      out[dateTime] = schedule;
+    }
+  }
+
+  void _collectDailyTimes(
+    MedicationSchedule schedule,
+    DailySchedule scheduling,
+    DateTime now,
+    Map<DateTime, MedicationSchedule> out,
+  ) {
+    if (!scheduling.notify) return;
+
+    final today = Date.today();
+    final takenToday = medicationIntakeProvider.getTakenIntakesForScheduleOn(
+        schedule.id, today);
+
+    for (int i = 0; i < _nomberOfDays; i++) {
+      final date = today.add(Duration(days: i));
+      final isToday = date.isToday;
+
+      for (final time in scheduling.intakeTimes) {
         final dateTime = DateTime(
           date.year,
           date.month,
@@ -43,15 +97,14 @@ class NotificationScheduler {
         );
 
         if (now.isAfter(dateTime)) continue;
-        if (date.isToday && scheduling.isTakenTodayOrLater(lastTaken)) {
+        if (isToday &&
+            takenToday.any((intake) => intake.scheduledTime == time)) {
           continue;
         }
 
-        notificationsToSchedule[dateTime] = schedule;
+        out[dateTime] = schedule;
       }
     }
-
-    return notificationsToSchedule;
   }
 
   Future<void> regenerateAll(AppLocalizations l10n, String localeName) async {
