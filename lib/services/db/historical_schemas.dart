@@ -1,5 +1,3 @@
-import 'package:mona/services/db/db_tables.dart';
-
 const int oldestImportableVersion = 4;
 
 const String _supplyItemsV4 = '''
@@ -95,7 +93,7 @@ const String _bloodTestsV7 = '''
       estradiolLevels TEXT,
       testosteroneLevels TEXT,
       estradiolUnit TEXT,
-      testosteroneUnit TEXT,
+      testosteroneUnit TEXT
     )
     ''';
 
