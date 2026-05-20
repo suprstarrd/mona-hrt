@@ -18,6 +18,6 @@ extension MedicationScheduleL10n on MedicationSchedule {
       DailySchedule _ => localizations.scheduleFrequencyDaily,
     };
 
-    return '$localizedSummary(localizations)\n$frequency';
+    return '${localizedSummary(localizations)}\n$frequency';
   }
 }
