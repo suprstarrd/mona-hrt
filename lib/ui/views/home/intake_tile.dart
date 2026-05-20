@@ -34,13 +34,12 @@ class IntakeTile extends StatelessWidget {
       schedule: schedule,
       status: status,
       slotTime: occurrence.time,
-      slotTimeText: occurrence.time?.format(context),
       intakeProvider: medicationIntakeProvider,
       supplyProvider: supplyItemProvider,
       now: now,
-      theme: Theme.of(context),
       localizations: localizations,
       languageTag: context.languageTag,
+      context: context,
     );
 
     final textColor =
@@ -122,24 +121,22 @@ class IntakeTileViewModel {
       {required this.schedule,
       required this.status,
       required this.slotTime,
-      required this.slotTimeText,
       required this.intakeProvider,
       required this.supplyProvider,
       required this.now,
-      required this.theme,
       required this.localizations,
-      required this.languageTag});
+      required this.languageTag,
+      required this.context});
 
   final MedicationSchedule schedule;
   final ScheduleStatus status;
   final TimeOfDay? slotTime;
-  final String? slotTimeText;
   final MedicationIntakeProvider intakeProvider;
   final SupplyItemProvider supplyProvider;
   final DateTime now;
-  final ThemeData theme;
   final AppLocalizations localizations;
   final String languageTag;
+  final BuildContext context;
 
   bool get _isDailySlot => slotTime != null;
 
@@ -170,7 +167,7 @@ class IntakeTileViewModel {
 
   String? get scheduledText {
     if (_isDailySlot) {
-      return slotTimeText;
+      return slotTime?.format(context);
     }
 
     switch (status) {
@@ -210,12 +207,17 @@ class IntakeTileViewModel {
   }
 
   bool get isActive =>
-      status == ScheduleStatus.today ||
+      (status == ScheduleStatus.today && slotTime == null) ||
+      (status == ScheduleStatus.today &&
+          slotTime != null &&
+          !(slotTime!.isAfter(TimeOfDay.now()))) ||
       status == ScheduleStatus.overdue ||
       status == ScheduleStatus.todayOverdue ||
       status == ScheduleStatus.todayEarly;
 
   Widget get tileIcon {
+    final theme = Theme.of(context);
+
     if (status == ScheduleStatus.taken) {
       return CircleAvatar(
         backgroundColor: theme.colorScheme.tertiary,
