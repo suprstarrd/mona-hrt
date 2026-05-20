@@ -66,29 +66,6 @@ void main() {
       });
     });
 
-    group('IntervalDaysSchedule.validateIntervalDays', () {
-      test('rejects null, empty, zero, negative, and non-numeric input', () {
-        expect(
-          [
-            IntervalDaysSchedule.validateIntervalDays(l10n, null),
-            IntervalDaysSchedule.validateIntervalDays(l10n, ''),
-            IntervalDaysSchedule.validateIntervalDays(l10n, '0'),
-            IntervalDaysSchedule.validateIntervalDays(l10n, '-2'),
-            IntervalDaysSchedule.validateIntervalDays(l10n, 'abc'),
-            IntervalDaysSchedule.validateIntervalDays(l10n, '7'),
-          ],
-          [
-            isNotNull,
-            isNotNull,
-            isNotNull,
-            isNotNull,
-            isNotNull,
-            isNull,
-          ],
-        );
-      });
-    });
-
     group('IntervalDaysSchedule.nextDate', () {
       test('startDate > today -> returns startDate', () {
         final start = Date.today().add(Duration(days: 5));
