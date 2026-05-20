@@ -5,10 +5,10 @@ import 'package:mona/data/model/scheduled_occurrence.dart';
 import 'package:mona/data/model/scheduling_strategy.dart';
 import 'package:mona/data/providers/medication_intake_provider.dart';
 
-class ScheduleOccurrences {
+class OccurrencesManager {
   final MedicationIntakeProvider _intakes;
 
-  const ScheduleOccurrences(this._intakes);
+  const OccurrencesManager(this._intakes);
 
   List<ScheduledOccurrence> currentFor(MedicationSchedule schedule) {
     switch (schedule.scheduling) {

@@ -6,7 +6,7 @@ import 'package:intl/date_symbol_data_local.dart';
 import 'package:mockito/annotations.dart';
 import 'package:mockito/mockito.dart';
 import 'package:mona/controllers/notification_scheduler.dart';
-import 'package:mona/controllers/schedule_occurrences.dart';
+import 'package:mona/controllers/occurrences_manager.dart';
 import 'package:mona/data/model/administration_route.dart';
 import 'package:mona/data/model/date.dart';
 import 'package:mona/data/model/medication_schedule.dart';
@@ -22,7 +22,7 @@ import 'package:timezone/timezone.dart' as tz;
 
 @GenerateNiceMocks([
   MockSpec<MedicationScheduleProvider>(),
-  MockSpec<ScheduleOccurrences>(),
+  MockSpec<OccurrencesManager>(),
   MockSpec<PreferencesService>(),
   MockSpec<FlutterLocalNotificationsPlugin>(),
 ])

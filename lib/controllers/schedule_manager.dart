@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:mona/controllers/schedule_occurrences.dart';
+import 'package:mona/controllers/occurrences_manager.dart';
 import 'package:mona/data/model/medication_intake.dart';
 import 'package:mona/data/model/medication_schedule.dart';
 import 'package:mona/data/model/scheduling_strategy.dart';
@@ -21,7 +21,7 @@ class ScheduleSlot {
 
 class ScheduleManager {
   final MedicationScheduleProvider _scheduleProvider;
-  final ScheduleOccurrences _occurrences;
+  final OccurrencesManager _occurrences;
 
   ScheduleManager(this._scheduleProvider, this._occurrences);
 

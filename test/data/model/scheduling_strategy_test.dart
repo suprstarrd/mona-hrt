@@ -377,8 +377,7 @@ void main() {
               ScheduleStatus.overdue);
         });
 
-        test('not scheduled for today, never taken and overdue -> overdue',
-            () {
+        test('not scheduled for today, never taken and overdue -> overdue', () {
           final s = IntervalDaysSchedule(intervalDays: 7);
           final start = Date.today().subtract(Duration(days: 10));
           expect(s.statusFor(startDate: start, date: Date.today()),
@@ -425,8 +424,7 @@ void main() {
           final start = Date.today().subtract(Duration(days: 10));
           expect(
               s.statusFor(
-                  startDate: start,
-                  date: Date.today().add(Duration(days: 1))),
+                  startDate: start, date: Date.today().add(Duration(days: 1))),
               ScheduleStatus.upcoming);
         });
 
@@ -457,8 +455,7 @@ void main() {
           );
 
       test('matched intake on today -> taken', () {
-        expect(
-            s.statusFor(date: Date.today(), matchedIntake: intakeAt(time)),
+        expect(s.statusFor(date: Date.today(), matchedIntake: intakeAt(time)),
             ScheduleStatus.taken);
       });
 
@@ -471,13 +468,11 @@ void main() {
       });
 
       test('today, no matched intake -> today', () {
-        expect(
-            s.statusFor(date: Date.today()), ScheduleStatus.today);
+        expect(s.statusFor(date: Date.today()), ScheduleStatus.today);
       });
 
       test('future date, no matched intake -> upcoming', () {
-        expect(
-            s.statusFor(date: Date.today().add(const Duration(days: 1))),
+        expect(s.statusFor(date: Date.today().add(const Duration(days: 1))),
             ScheduleStatus.upcoming);
       });
     });

@@ -18,7 +18,7 @@ import 'package:flutter_local_notifications/src/types.dart' as _i18;
 import 'package:flutter_local_notifications_platform_interface/flutter_local_notifications_platform_interface.dart'
     as _i14;
 import 'package:mockito/mockito.dart' as _i1;
-import 'package:mona/controllers/schedule_occurrences.dart' as _i7;
+import 'package:mona/controllers/occurrences_manager.dart' as _i7;
 import 'package:mona/data/model/medication_schedule.dart' as _i4;
 import 'package:mona/data/model/molecule.dart' as _i11;
 import 'package:mona/data/model/scheduled_occurrence.dart' as _i8;
@@ -190,11 +190,11 @@ class MockMedicationScheduleProvider extends _i1.Mock
       );
 }
 
-/// A class which mocks [ScheduleOccurrences].
+/// A class which mocks [OccurrencesManager].
 ///
 /// See the documentation for Mockito's code generation for more information.
-class MockScheduleOccurrences extends _i1.Mock
-    implements _i7.ScheduleOccurrences {
+class MockOccurrencesManager extends _i1.Mock
+    implements _i7.OccurrencesManager {
   @override
   List<_i8.ScheduledOccurrence> currentFor(_i4.MedicationSchedule? schedule) =>
       (super.noSuchMethod(

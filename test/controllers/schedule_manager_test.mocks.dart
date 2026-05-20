@@ -7,7 +7,7 @@ import 'dart:async' as _i5;
 import 'dart:ui' as _i6;
 
 import 'package:mockito/mockito.dart' as _i1;
-import 'package:mona/controllers/schedule_occurrences.dart' as _i7;
+import 'package:mona/controllers/occurrences_manager.dart' as _i7;
 import 'package:mona/data/model/medication_schedule.dart' as _i4;
 import 'package:mona/data/model/scheduled_occurrence.dart' as _i8;
 import 'package:mona/data/providers/medication_schedule_provider.dart' as _i3;
@@ -175,11 +175,11 @@ class MockMedicationScheduleProvider extends _i1.Mock
       );
 }
 
-/// A class which mocks [ScheduleOccurrences].
+/// A class which mocks [OccurrencesManager].
 ///
 /// See the documentation for Mockito's code generation for more information.
-class MockScheduleOccurrences extends _i1.Mock
-    implements _i7.ScheduleOccurrences {
+class MockOccurrencesManager extends _i1.Mock
+    implements _i7.OccurrencesManager {
   @override
   List<_i8.ScheduledOccurrence> currentFor(_i4.MedicationSchedule? schedule) =>
       (super.noSuchMethod(

@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/annotations.dart';
 import 'package:mockito/mockito.dart';
-import 'package:mona/controllers/schedule_occurrences.dart';
+import 'package:mona/controllers/occurrences_manager.dart';
 import 'package:mona/data/model/administration_route.dart';
 import 'package:mona/data/model/date.dart';
 import 'package:mona/data/model/medication_intake.dart';
@@ -44,11 +44,11 @@ MedicationIntake intakeAt(TimeOfDay time, {int id = 0, int scheduleId = 1}) =>
 
 void main() {
   late MockMedicationIntakeProvider intakes;
-  late ScheduleOccurrences occurrences;
+  late OccurrencesManager occurrences;
 
   setUp(() {
     intakes = MockMedicationIntakeProvider();
-    occurrences = ScheduleOccurrences(intakes);
+    occurrences = OccurrencesManager(intakes);
   });
 
   group('currentFor — IntervalDaysSchedule', () {
@@ -64,7 +64,8 @@ void main() {
     test('overdue (not scheduled today, past missed) -> status overdue', () {
       final start = Date.today().subtract(const Duration(days: 9));
       final s = schedule(
-          id: 7, scheduling: IntervalDaysSchedule(intervalDays: 2),
+          id: 7,
+          scheduling: IntervalDaysSchedule(intervalDays: 2),
           startDate: start);
       when(intakes.getLastIntakeLocalDateForSchedule(7))
           .thenReturn(start); // taken at start, missed since
@@ -80,8 +81,7 @@ void main() {
       expect(occurrences.currentFor(s).single.status, ScheduleStatus.upcoming);
     });
 
-    test('scheduled today, taken today -> taken with last intake attached',
-        () {
+    test('scheduled today, taken today -> taken with last intake attached', () {
       final start = Date.today().subtract(const Duration(days: 14));
       final intake = intakeAt(const TimeOfDay(hour: 8, minute: 0), id: 42);
       final s = schedule(
@@ -120,8 +120,8 @@ void main() {
     test('time mirrors notificationTime', () {
       const t = TimeOfDay(hour: 9, minute: 30);
       final s = schedule(
-          scheduling: IntervalDaysSchedule(
-              intervalDays: 7, notificationTime: t));
+          scheduling:
+              IntervalDaysSchedule(intervalDays: 7, notificationTime: t));
 
       expect(occurrences.currentFor(s).single.time, t);
     });
@@ -294,8 +294,8 @@ void main() {
 
     test('future-day slots never carry intake and are upcoming', () {
       final morningIntake = intakeAt(morning, id: 1);
-      final s = schedule(
-          scheduling: const DailySchedule(intakeTimes: [morning]));
+      final s =
+          schedule(scheduling: const DailySchedule(intakeTimes: [morning]));
       when(intakes.getTakenIntakesForScheduleOn(1, Date.today()))
           .thenReturn([morningIntake]);
 

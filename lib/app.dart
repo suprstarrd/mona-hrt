@@ -2,7 +2,7 @@ import 'package:dynamic_system_colors/dynamic_system_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:mona/controllers/notification_scheduler.dart';
-import 'package:mona/controllers/schedule_occurrences.dart';
+import 'package:mona/controllers/occurrences_manager.dart';
 import 'package:mona/data/providers/medication_intake_provider.dart';
 import 'package:mona/data/providers/medication_schedule_provider.dart';
 import 'package:mona/l10n/app_localizations.dart';
@@ -76,7 +76,7 @@ class _MonaAppState extends State<MonaApp> with WidgetsBindingObserver {
 
     NotificationScheduler(
       _medicationScheduleProvider,
-      ScheduleOccurrences(_medicationIntakeProvider),
+      OccurrencesManager(_medicationIntakeProvider),
       _preferencesService,
     ).regenerateAll(l10n, locale.toLanguageTag());
   }

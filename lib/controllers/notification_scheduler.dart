@@ -1,5 +1,5 @@
 import 'package:intl/intl.dart';
-import 'package:mona/controllers/schedule_occurrences.dart';
+import 'package:mona/controllers/occurrences_manager.dart';
 import 'package:mona/data/model/medication_schedule.dart';
 import 'package:mona/data/model/scheduling_strategy.dart';
 import 'package:mona/data/providers/medication_schedule_provider.dart';
@@ -11,7 +11,7 @@ class NotificationScheduler {
   static const int _numberOfDays = 5;
 
   final MedicationScheduleProvider medicationScheduleProvider;
-  final ScheduleOccurrences scheduleOccurrences;
+  final OccurrencesManager scheduleOccurrences;
   final PreferencesService preferencesService;
 
   NotificationScheduler(
@@ -20,8 +20,8 @@ class NotificationScheduler {
     this.preferencesService,
   );
 
-  List<_ScheduledNotification> _getNotificationTimes() {
-    final out = <_ScheduledNotification>[];
+  List<_ScheduledNotification> _getScheduledNotifications() {
+    final notifications = <_ScheduledNotification>[];
     final now = DateTime.now();
 
     for (final schedule in medicationScheduleProvider.schedules) {
@@ -33,11 +33,11 @@ class NotificationScheduler {
         if (occ.status == ScheduleStatus.taken) continue;
         final dt = occ.localDateTime;
         if (dt == null || now.isAfter(dt)) continue;
-        out.add((dateTime: dt, schedule: schedule));
+        notifications.add((dateTime: dt, schedule: schedule));
       }
     }
 
-    return out;
+    return notifications;
   }
 
   Future<void> regenerateAll(AppLocalizations l10n, String localeName) async {
@@ -50,10 +50,10 @@ class NotificationScheduler {
 
     final scheduledDateTimeFormat = DateFormat.MMMMd(localeName);
 
-    final notificationTimes = _getNotificationTimes();
+    final scheduledNotifications = _getScheduledNotifications();
 
     await Future.wait(
-      notificationTimes.map((entry) {
+      scheduledNotifications.map((entry) {
         final dateTime = entry.dateTime;
         final schedule = entry.schedule;
 

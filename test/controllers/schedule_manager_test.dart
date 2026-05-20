@@ -4,7 +4,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/annotations.dart';
 import 'package:mockito/mockito.dart';
 import 'package:mona/controllers/schedule_manager.dart';
-import 'package:mona/controllers/schedule_occurrences.dart';
+import 'package:mona/controllers/occurrences_manager.dart';
 import 'package:mona/data/model/administration_route.dart';
 import 'package:mona/data/model/date.dart';
 import 'package:mona/data/model/medication_intake.dart';
@@ -16,7 +16,7 @@ import 'package:mona/data/providers/medication_schedule_provider.dart';
 
 @GenerateNiceMocks([
   MockSpec<MedicationScheduleProvider>(),
-  MockSpec<ScheduleOccurrences>(),
+  MockSpec<OccurrencesManager>(),
 ])
 import 'schedule_manager_test.mocks.dart';
 
@@ -75,8 +75,7 @@ void main() {
 
       when(scheduleProvider.schedules).thenReturn([s]);
       when(occurrences.currentFor(s)).thenReturn([
-        occurrence(
-            status: ScheduleStatus.taken, time: time, intake: intake),
+        occurrence(status: ScheduleStatus.taken, time: time, intake: intake),
       ]);
 
       final slot = manager.getSlots().single;
