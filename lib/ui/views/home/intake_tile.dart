@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:material_symbols_icons/symbols.dart';
-import 'package:mona/controllers/schedule_manager.dart';
 import 'package:mona/data/model/date.dart';
 import 'package:mona/data/model/medication_schedule.dart';
+import 'package:mona/data/model/scheduled_occurrence.dart';
 import 'package:mona/data/model/scheduling_strategy.dart';
 import 'package:mona/data/providers/medication_intake_provider.dart';
 import 'package:mona/data/providers/supply_item_provider.dart';
@@ -15,12 +15,12 @@ import 'package:mona/ui/views/intakes/edit_intake_page.dart';
 import 'package:provider/provider.dart';
 
 class IntakeTile extends StatelessWidget {
-  const IntakeTile(this.slot, {super.key});
+  const IntakeTile(this.occurrence, {super.key});
 
-  final ScheduleSlot slot;
+  final ScheduledOccurrence occurrence;
 
-  MedicationSchedule get schedule => slot.schedule;
-  ScheduleStatus get status => slot.status;
+  MedicationSchedule get schedule => occurrence.schedule;
+  ScheduleStatus get status => occurrence.status;
 
   @override
   Widget build(BuildContext context) {
@@ -33,8 +33,8 @@ class IntakeTile extends StatelessWidget {
     final viewModel = IntakeTileViewModel(
       schedule: schedule,
       status: status,
-      slotTime: slot.time,
-      slotTimeText: slot.time?.format(context),
+      slotTime: occurrence.time,
+      slotTimeText: occurrence.time?.format(context),
       intakeProvider: medicationIntakeProvider,
       supplyProvider: supplyItemProvider,
       now: now,
@@ -52,7 +52,7 @@ class IntakeTile extends StatelessWidget {
       margin: const EdgeInsets.symmetric(vertical: 4),
       child: InkWell(
         onTap: () {
-          final intake = slot.intake;
+          final intake = occurrence.intake;
           Navigator.of(context).push(
             MaterialPageRoute<void>(
               fullscreenDialog: true,
@@ -60,7 +60,7 @@ class IntakeTile extends StatelessWidget {
                   ? EditIntakePage(intake)
                   : TakeMedicationPage(
                       schedule,
-                      scheduledTime: slot.time,
+                      scheduledTime: occurrence.time,
                     ),
             ),
           );

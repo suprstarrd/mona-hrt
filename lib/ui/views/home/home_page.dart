@@ -2,13 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:material_symbols_icons/symbols.dart';
 import 'package:mona/controllers/occurrences_manager.dart';
-import 'package:mona/controllers/schedule_manager.dart';
 import 'package:mona/data/model/date.dart';
 import 'package:mona/data/providers/medication_intake_provider.dart';
 import 'package:mona/data/providers/medication_schedule_provider.dart';
 import 'package:mona/l10n/build_context_extensions.dart';
 import 'package:mona/ui/constants/dimensions.dart';
 import 'package:mona/ui/views/home/intake_tile.dart';
+import 'package:mona/ui/views/home/split_by_day.dart';
 import 'package:mona/ui/widgets/main_page_wrapper.dart';
 import 'package:provider/provider.dart';
 
@@ -19,9 +19,9 @@ class HomePage extends StatelessWidget {
     final intakeProvider = context.watch<MedicationIntakeProvider>();
     final localizations = context.l10n;
 
-    final scheduleManager =
-        ScheduleManager(OccurrencesManager(intakeProvider, scheduleProvider));
-    final slots = scheduleManager.splitSlotsByDay();
+    final occurrences = splitByDay(
+      OccurrencesManager(intakeProvider, scheduleProvider).current(),
+    );
 
     return MainPageWrapper(
       isLoading: (scheduleProvider.isLoading || intakeProvider.isLoading),
@@ -34,13 +34,13 @@ class HomePage extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               _SectionTitle(_todayTitle(context)),
-              if (slots.today.isEmpty)
+              if (occurrences.today.isEmpty)
                 _NoIntakesDueCard(message: localizations.noIntakesDue)
               else
-                ...slots.today.map(IntakeTile.new),
-              if (slots.upcoming.isNotEmpty) ...[
+                ...occurrences.today.map(IntakeTile.new),
+              if (occurrences.upcoming.isNotEmpty) ...[
                 _SectionTitle(localizations.upcoming),
-                ...slots.upcoming.map(IntakeTile.new),
+                ...occurrences.upcoming.map(IntakeTile.new),
               ],
             ],
           ),
