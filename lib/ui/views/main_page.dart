@@ -36,7 +36,7 @@ class _MainPageState extends State<MainPage> {
   }
 
   Future<void> _runAutomaticUpdateCheck() async {
-    if (isPlayStoreDistribution) return;
+    if (isStoreDistribution) return;
     final prefs = context.read<PreferencesService>();
     if (!prefs.autoCheckUpdatesEnabled) return;
 

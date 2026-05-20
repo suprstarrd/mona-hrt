@@ -1,10 +1,16 @@
 name: CI - release
 
-# Trigger on version tags pushed after merging dev into main (e.g. v1.2.3)
+# Manually triggered from the Actions tab (or `gh workflow run`) with the
+# release version as input. CI bumps the version, commits to main, and creates
+# the matching `vX.Y.Z` tag on that bumped commit.
+
 on:
-  push:
-    tags:
-      - "v*.*.*"
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "Release version (e.g. 1.8.0)"
+        required: true
+        type: string
 
 jobs:
   # ── Format ────────────────────────────────────────────────────────────────
@@ -70,77 +76,82 @@ jobs:
       - name: Run tests with coverage
         run: flutter test --coverage
 
-  # ── Version bump commit ───────────────────────────────────────────────────
+  # ── Version bump + tag (on the bumped commit) ─────────────────────────────
   bump_version:
-    name: Bump version
+    name: Bump version and tag
     runs-on: ubuntu-latest
-    # Only run after all quality checks pass
     needs: [format, analyze, test_coverage]
+    outputs:
+      version: ${{ steps.version.outputs.version }}
+      tag: ${{ steps.version.outputs.tag }}
 
     steps:
       - name: Checkout repository
-        # Needs a PAT (not the default GITHUB_TOKEN) so the push is allowed
-        # on a branch protected by branch protection rules.
-        # Create a fine-grained PAT with "Contents: Read and write" on this repo
-        # and store it as the secret VERSION_BUMP_PAT.
         uses: actions/checkout@v6
         with:
           token: ${{ secrets.VERSION_BUMP_PAT }}
           ref: main
 
-      # Extract version number from the tag (strips the leading "v")
-      - name: Parse version from tag
+      - name: Validate and parse version
         id: version
         env:
+          INPUT_VERSION: ${{ inputs.version }}
           RUN_NUMBER: ${{ github.run_number }}
         run: |
-          VERSION="${GITHUB_REF_NAME#v}"
+          if ! [[ "$INPUT_VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo "::error::Version must be MAJOR.MINOR.PATCH (got: '$INPUT_VERSION')"
+            exit 1
+          fi
+          if git ls-remote --tags --exit-code origin "refs/tags/v${INPUT_VERSION}" >/dev/null 2>&1; then
+            echo "::error::Tag v${INPUT_VERSION} already exists on origin"
+            exit 1
+          fi
           BUILD_NUMBER=$((RUN_NUMBER + 5))
-          echo "version=$VERSION"       >> "$GITHUB_OUTPUT"
-          echo "build_number=$BUILD_NUMBER" >> "$GITHUB_OUTPUT"
+          {
+            echo "version=${INPUT_VERSION}"
+            echo "tag=v${INPUT_VERSION}"
+            echo "build_number=${BUILD_NUMBER}"
+          } >> "$GITHUB_OUTPUT"
 
-      # Update pubspec.yaml: replace the version line
       - name: Update pubspec.yaml
+        env:
+          VERSION: ${{ steps.version.outputs.version }}
+          BUILD: ${{ steps.version.outputs.build_number }}
         run: |
-          VERSION="${{ steps.version.outputs.version }}"
-          BUILD="${{ steps.version.outputs.build_number }}"
           sed -i "s/^version: .*/version: ${VERSION}+${BUILD}/" pubspec.yaml
 
-      # Update MARKETING_VERSION in the Runner target only (not RunnerTests).
-      # RunnerTests always has MARKETING_VERSION = 1.0 so we only replace
-      # occurrences that match the previous app version (read from pubspec
-      # before the sed above ran — we re-read the file on disk).
       - name: Update MARKETING_VERSION in project.pbxproj
+        env:
+          VERSION: ${{ steps.version.outputs.version }}
         run: |
-          VERSION="${{ steps.version.outputs.version }}"
           FILE="ios/Runner.xcodeproj/project.pbxproj"
           # Read the old version straight from the pbxproj (e.g. "1.5.2")
           OLD_VERSION=$(grep -m1 'MARKETING_VERSION = [0-9]' "$FILE" \
             | sed 's/.*MARKETING_VERSION = \([^;]*\);.*/\1/')
           sed -i "s/MARKETING_VERSION = ${OLD_VERSION};/MARKETING_VERSION = ${VERSION};/g" "$FILE"
 
-      # Commit the two modified files
-      - name: Commit version bump
+      - name: Commit bump and push tag
+        env:
+          TAG: ${{ steps.version.outputs.tag }}
         run: |
           git config user.name  "délia"
           git config user.email "delia@cheminot.net"
           git add pubspec.yaml ios/Runner.xcodeproj/project.pbxproj
-          git commit -m "chore: update version"
-          git push origin main
+          git commit -m "chore: release ${TAG}"
+          git tag "${TAG}"
+          git push --atomic origin main "refs/tags/${TAG}"
 
-  # ── Build Android release APK (signed) ────────────────────────────────────
+  # ── Build Android release APK ─────────────────────────────────────────────
   build_android_standalone:
-    name: Build Android APK (standalone, signed)
+    name: Build Android APK (standalone)
     runs-on: ubuntu-latest
-    # Run after the version bump so the APK embeds the correct version
     needs: [bump_version]
 
     steps:
-      # Checkout main again so we get the version bump commit
       - name: Checkout repository
         uses: actions/checkout@v6
         with:
-          ref: main
+          ref: ${{ needs.bump_version.outputs.tag }}
 
       - name: Set up Java 17
         uses: actions/setup-java@v5
@@ -158,13 +169,11 @@ jobs:
       - name: Get dependencies
         run: flutter pub get
 
-      # Decode the keystore stored as a base64 secret and write it to disk
       - name: Decode keystore
         run: |
           echo "${{ secrets.ANDROID_KEYSTORE_BASE64 }}" | base64 --decode \
             > android/app/upload-keystore.jks
 
-      # Write key.properties so Gradle can find the signing config
       - name: Create key.properties
         run: |
           cat <<EOF > android/key.properties
@@ -175,19 +184,20 @@ jobs:
           EOF
 
       - name: Build release APK
-        run: flutter build apk --release --flavor standalone
+        run: |
+          flutter clean
+          flutter build apk --release --flavor standalone
 
-      # Remove signing artifacts from the runner before the job ends
       - name: Clean up signing files
         if: always()
         run: |
           rm -f android/app/upload-keystore.jks
           rm -f android/key.properties
 
-      # Rename the APK to mona-[version].apk (strips the leading "v" from the tag)
       - name: Rename APK
+        env:
+          VERSION: ${{ needs.bump_version.outputs.version }}
         run: |
-          VERSION="${GITHUB_REF_NAME#v}"
           mv build/app/outputs/flutter-apk/app-standalone-release.apk "build/app/outputs/flutter-apk/mona-${VERSION}.apk"
 
       - name: Upload APK artifact
@@ -197,9 +207,9 @@ jobs:
           path: build/app/outputs/flutter-apk/mona-*.apk
           retention-days: 7
 
-  # ── Build Android release App Bundle (signed, Play Store) ─────────────────
-  build_android_play:
-    name: Build Android AAB (play, signed)
+  # ── Build Android release App Bundle + split-per-ABI APKs (Store version) ─
+  build_android_store:
+    name: Build Android AAB and APKs (store)
     runs-on: ubuntu-latest
     needs: [bump_version]
 
@@ -207,7 +217,7 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v6
         with:
-          ref: main
+          ref: ${{ needs.bump_version.outputs.tag }}
 
       - name: Set up Java 17
         uses: actions/setup-java@v5
@@ -240,7 +250,14 @@ jobs:
           EOF
 
       - name: Build release App Bundle
-        run: flutter build appbundle --release --flavor play
+        run: |
+          flutter clean
+          flutter build appbundle --release --flavor store
+
+      - name: Build release APKs (split per ABI)
+        run: |
+          flutter clean
+          flutter build apk --release --flavor store --split-per-abi
 
       - name: Clean up signing files
         if: always()
@@ -249,22 +266,39 @@ jobs:
           rm -f android/key.properties
 
       - name: Rename AAB
+        env:
+          VERSION: ${{ needs.bump_version.outputs.version }}
         run: |
-          VERSION="${GITHUB_REF_NAME#v}"
-          mv build/app/outputs/bundle/playRelease/app-play-release.aab "build/app/outputs/bundle/playRelease/mona-${VERSION}.aab"
+          mv build/app/outputs/bundle/storeRelease/app-store-release.aab "build/app/outputs/bundle/storeRelease/mona-${VERSION}.aab"
+
+      - name: Rename per-ABI APKs
+        run: |
+          cd build/app/outputs/flutter-apk
+          for f in app-*-store-release.apk; do
+            abi="${f#app-}"
+            abi="${abi%-store-release.apk}"
+            mv "$f" "mona-store-${abi}.apk"
+          done
 
       - name: Upload AAB artifact
         uses: actions/upload-artifact@v6
         with:
-          name: android-release-aab-play
-          path: build/app/outputs/bundle/playRelease/mona-*.aab
+          name: android-release-aab-store
+          path: build/app/outputs/bundle/storeRelease/mona-*.aab
+          retention-days: 7
+
+      - name: Upload store APK artifacts
+        uses: actions/upload-artifact@v6
+        with:
+          name: android-release-apk-store
+          path: build/app/outputs/flutter-apk/mona-store-*.apk
           retention-days: 7
 
   # ── GitHub Release ─────────────────────────────────────────────────────────
   create_release:
     name: Create GitHub Release
     runs-on: ubuntu-latest
-    needs: [build_android_standalone]
+    needs: [bump_version, build_android_standalone, build_android_store]
     permissions:
       contents: write
 
@@ -275,13 +309,17 @@ jobs:
           name: android-release-apk-standalone
           path: artifacts/
 
-      # Create the release and attach the APK.
-      # The tag name becomes the release title (e.g. "v1.2.3").
+      - name: Download store split-per-ABI APK artifacts
+        uses: actions/download-artifact@v6
+        with:
+          name: android-release-apk-store
+          path: artifacts/
+
       - name: Create release and upload APKs
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: ${{ github.ref_name }}
-          name: ${{ github.ref_name }}
+          tag_name: ${{ needs.bump_version.outputs.tag }}
+          name: ${{ needs.bump_version.outputs.tag }}
           files: |
             artifacts/mona-*.apk
-          generate_release_notes: false
+          generate_release_notes: true
