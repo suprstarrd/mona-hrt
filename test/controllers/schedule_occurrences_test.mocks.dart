@@ -9,7 +9,9 @@ import 'dart:ui' as _i7;
 import 'package:mockito/mockito.dart' as _i1;
 import 'package:mona/data/model/date.dart' as _i6;
 import 'package:mona/data/model/medication_intake.dart' as _i4;
+import 'package:mona/data/model/medication_schedule.dart' as _i9;
 import 'package:mona/data/providers/medication_intake_provider.dart' as _i3;
+import 'package:mona/data/providers/medication_schedule_provider.dart' as _i8;
 import 'package:mona/services/repository.dart' as _i2;
 
 // ignore_for_file: type=lint
@@ -224,6 +226,143 @@ class MockMedicationIntakeProvider extends _i1.Mock
         ),
         returnValueForMissingStub: null,
       ) as _i4.MedicationIntake?);
+
+  @override
+  void addListener(_i7.VoidCallback? listener) => super.noSuchMethod(
+        Invocation.method(
+          #addListener,
+          [listener],
+        ),
+        returnValueForMissingStub: null,
+      );
+
+  @override
+  void removeListener(_i7.VoidCallback? listener) => super.noSuchMethod(
+        Invocation.method(
+          #removeListener,
+          [listener],
+        ),
+        returnValueForMissingStub: null,
+      );
+
+  @override
+  void dispose() => super.noSuchMethod(
+        Invocation.method(
+          #dispose,
+          [],
+        ),
+        returnValueForMissingStub: null,
+      );
+
+  @override
+  void notifyListeners() => super.noSuchMethod(
+        Invocation.method(
+          #notifyListeners,
+          [],
+        ),
+        returnValueForMissingStub: null,
+      );
+}
+
+/// A class which mocks [MedicationScheduleProvider].
+///
+/// See the documentation for Mockito's code generation for more information.
+class MockMedicationScheduleProvider extends _i1.Mock
+    implements _i8.MedicationScheduleProvider {
+  @override
+  _i2.Repository<_i9.MedicationSchedule> get repository => (super.noSuchMethod(
+        Invocation.getter(#repository),
+        returnValue: _FakeRepository_0<_i9.MedicationSchedule>(
+          this,
+          Invocation.getter(#repository),
+        ),
+        returnValueForMissingStub: _FakeRepository_0<_i9.MedicationSchedule>(
+          this,
+          Invocation.getter(#repository),
+        ),
+      ) as _i2.Repository<_i9.MedicationSchedule>);
+
+  @override
+  List<_i9.MedicationSchedule> get schedules => (super.noSuchMethod(
+        Invocation.getter(#schedules),
+        returnValue: <_i9.MedicationSchedule>[],
+        returnValueForMissingStub: <_i9.MedicationSchedule>[],
+      ) as List<_i9.MedicationSchedule>);
+
+  @override
+  bool get isLoading => (super.noSuchMethod(
+        Invocation.getter(#isLoading),
+        returnValue: false,
+        returnValueForMissingStub: false,
+      ) as bool);
+
+  @override
+  bool get hasListeners => (super.noSuchMethod(
+        Invocation.getter(#hasListeners),
+        returnValue: false,
+        returnValueForMissingStub: false,
+      ) as bool);
+
+  @override
+  _i9.MedicationSchedule? getScheduleById(int? id) => (super.noSuchMethod(
+        Invocation.method(
+          #getScheduleById,
+          [id],
+        ),
+        returnValueForMissingStub: null,
+      ) as _i9.MedicationSchedule?);
+
+  @override
+  _i5.Future<void> fetchSchedules() => (super.noSuchMethod(
+        Invocation.method(
+          #fetchSchedules,
+          [],
+        ),
+        returnValue: _i5.Future<void>.value(),
+        returnValueForMissingStub: _i5.Future<void>.value(),
+      ) as _i5.Future<void>);
+
+  @override
+  _i5.Future<void> deleteScheduleFromId(int? id) => (super.noSuchMethod(
+        Invocation.method(
+          #deleteScheduleFromId,
+          [id],
+        ),
+        returnValue: _i5.Future<void>.value(),
+        returnValueForMissingStub: _i5.Future<void>.value(),
+      ) as _i5.Future<void>);
+
+  @override
+  _i5.Future<void> deleteSchedule(_i9.MedicationSchedule? schedule) =>
+      (super.noSuchMethod(
+        Invocation.method(
+          #deleteSchedule,
+          [schedule],
+        ),
+        returnValue: _i5.Future<void>.value(),
+        returnValueForMissingStub: _i5.Future<void>.value(),
+      ) as _i5.Future<void>);
+
+  @override
+  _i5.Future<void> add(_i9.MedicationSchedule? schedule) => (super.noSuchMethod(
+        Invocation.method(
+          #add,
+          [schedule],
+        ),
+        returnValue: _i5.Future<void>.value(),
+        returnValueForMissingStub: _i5.Future<void>.value(),
+      ) as _i5.Future<void>);
+
+  @override
+  _i5.Future<void> updateSchedule(_i9.MedicationSchedule? schedule) =>
+      (super.noSuchMethod(
+        Invocation.method(
+          #updateSchedule,
+          [schedule],
+        ),
+        returnValue: _i5.Future<void>.value(),
+        returnValueForMissingStub: _i5.Future<void>.value(),
+      ) as _i5.Future<void>);
 
   @override
   void addListener(_i7.VoidCallback? listener) => super.noSuchMethod(

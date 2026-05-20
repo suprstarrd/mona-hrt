@@ -11,8 +11,12 @@ import 'package:mona/data/model/medication_schedule.dart';
 import 'package:mona/data/model/molecule.dart';
 import 'package:mona/data/model/scheduling_strategy.dart';
 import 'package:mona/data/providers/medication_intake_provider.dart';
+import 'package:mona/data/providers/medication_schedule_provider.dart';
 
-@GenerateNiceMocks([MockSpec<MedicationIntakeProvider>()])
+@GenerateNiceMocks([
+  MockSpec<MedicationIntakeProvider>(),
+  MockSpec<MedicationScheduleProvider>(),
+])
 import 'schedule_occurrences_test.mocks.dart';
 
 MedicationSchedule schedule({
@@ -44,18 +48,26 @@ MedicationIntake intakeAt(TimeOfDay time, {int id = 0, int scheduleId = 1}) =>
 
 void main() {
   late MockMedicationIntakeProvider intakes;
+  late MockMedicationScheduleProvider schedules;
   late OccurrencesManager occurrences;
 
   setUp(() {
     intakes = MockMedicationIntakeProvider();
-    occurrences = OccurrencesManager(intakes);
+    schedules = MockMedicationScheduleProvider();
+    when(schedules.schedules).thenReturn([]);
+    occurrences = OccurrencesManager(intakes, schedules);
   });
 
-  group('currentFor — IntervalDaysSchedule', () {
+  void withSchedules(List<MedicationSchedule> all) {
+    when(schedules.schedules).thenReturn(all);
+  }
+
+  group('current — IntervalDaysSchedule', () {
     test('returns exactly one occurrence dated today', () {
       final s = schedule(scheduling: IntervalDaysSchedule(intervalDays: 7));
+      withSchedules([s]);
 
-      final result = occurrences.currentFor(s);
+      final result = occurrences.current();
 
       expect(result, hasLength(1));
       expect(result.single.date, Date.today());
@@ -67,18 +79,20 @@ void main() {
           id: 7,
           scheduling: IntervalDaysSchedule(intervalDays: 2),
           startDate: start);
+      withSchedules([s]);
       when(intakes.getLastIntakeLocalDateForSchedule(7))
           .thenReturn(start); // taken at start, missed since
 
-      expect(occurrences.currentFor(s).single.status, ScheduleStatus.overdue);
+      expect(occurrences.current().single.status, ScheduleStatus.overdue);
     });
 
     test('not scheduled today, start in the future -> upcoming', () {
       final s = schedule(
           scheduling: IntervalDaysSchedule(intervalDays: 7),
           startDate: Date.today().add(const Duration(days: 5)));
+      withSchedules([s]);
 
-      expect(occurrences.currentFor(s).single.status, ScheduleStatus.upcoming);
+      expect(occurrences.current().single.status, ScheduleStatus.upcoming);
     });
 
     test('scheduled today, taken today -> taken with last intake attached', () {
@@ -88,11 +102,12 @@ void main() {
           id: 7,
           scheduling: IntervalDaysSchedule(intervalDays: 7),
           startDate: start);
+      withSchedules([s]);
       when(intakes.getLastIntakeLocalDateForSchedule(7))
           .thenReturn(Date.today());
       when(intakes.getLastTakenIntakeForSchedule(7)).thenReturn(intake);
 
-      final occ = occurrences.currentFor(s).single;
+      final occ = occurrences.current().single;
 
       expect(occ.status, ScheduleStatus.taken);
       expect(occ.intake, intake);
@@ -100,8 +115,9 @@ void main() {
 
     test('non-taken occurrence carries no intake', () {
       final s = schedule(scheduling: IntervalDaysSchedule(intervalDays: 7));
+      withSchedules([s]);
 
-      expect(occurrences.currentFor(s).single.intake, isNull);
+      expect(occurrences.current().single.intake, isNull);
     });
 
     test('notifiable mirrors notificationTime presence', () {
@@ -112,9 +128,17 @@ void main() {
               notificationTime: const TimeOfDay(hour: 9, minute: 0)));
       final withoutTime =
           schedule(id: 2, scheduling: IntervalDaysSchedule(intervalDays: 7));
+      withSchedules([withTime, withoutTime]);
 
-      expect(occurrences.currentFor(withTime).single.notifiable, isTrue);
-      expect(occurrences.currentFor(withoutTime).single.notifiable, isFalse);
+      final result = occurrences.current();
+      expect(
+        result.singleWhere((it) => it.schedule.id == withTime.id).notifiable,
+        isTrue,
+      );
+      expect(
+        result.singleWhere((it) => it.schedule.id == withoutTime.id).notifiable,
+        isFalse,
+      );
     });
 
     test('time mirrors notificationTime', () {
@@ -122,12 +146,13 @@ void main() {
       final s = schedule(
           scheduling:
               IntervalDaysSchedule(intervalDays: 7, notificationTime: t));
+      withSchedules([s]);
 
-      expect(occurrences.currentFor(s).single.time, t);
+      expect(occurrences.current().single.notificationTime, t);
     });
   });
 
-  group('currentFor — DailySchedule', () {
+  group('current — DailySchedule', () {
     const morning = TimeOfDay(hour: 8, minute: 0);
     const afternoon = TimeOfDay(hour: 14, minute: 0);
     const evening = TimeOfDay(hour: 20, minute: 30);
@@ -136,10 +161,11 @@ void main() {
       final s = schedule(
           scheduling:
               const DailySchedule(intakeTimes: [morning, afternoon, evening]));
+      withSchedules([s]);
       when(intakes.getTakenIntakesForScheduleOn(1, Date.today()))
           .thenReturn(<MedicationIntake>[]);
 
-      final result = occurrences.currentFor(s);
+      final result = occurrences.current();
 
       expect(result.map((o) => o.time), [morning, afternoon, evening]);
       expect(result.map((o) => o.date), everyElement(Date.today()));
@@ -153,10 +179,11 @@ void main() {
       final s = schedule(
           scheduling:
               const DailySchedule(intakeTimes: [morning, afternoon, evening]));
+      withSchedules([s]);
       when(intakes.getTakenIntakesForScheduleOn(1, Date.today()))
           .thenReturn([morningIntake, eveningIntake]);
 
-      final result = occurrences.currentFor(s);
+      final result = occurrences.current();
 
       expect(
         {for (final o in result) o.time: o.status},
@@ -176,10 +203,11 @@ void main() {
       final stray = intakeAt(afternoon);
       final s = schedule(
           scheduling: const DailySchedule(intakeTimes: [morning, evening]));
+      withSchedules([s]);
       when(intakes.getTakenIntakesForScheduleOn(1, Date.today()))
           .thenReturn([stray]);
 
-      final result = occurrences.currentFor(s);
+      final result = occurrences.current();
 
       expect(result.map((o) => o.status), everyElement(ScheduleStatus.today));
       expect(result.map((o) => o.intake), everyElement(isNull));
@@ -192,20 +220,29 @@ void main() {
           id: 2,
           scheduling:
               const DailySchedule(intakeTimes: [morning], notify: false));
+      withSchedules([loud, silent]);
       when(intakes.getTakenIntakesForScheduleOn(any, any)).thenReturn([]);
 
-      expect(occurrences.currentFor(loud).single.notifiable, isTrue);
-      expect(occurrences.currentFor(silent).single.notifiable, isFalse);
+      final result = occurrences.current();
+      expect(
+        result.singleWhere((it) => it.schedule.id == loud.id).notifiable,
+        isTrue,
+      );
+      expect(
+        result.singleWhere((it) => it.schedule.id == silent.id).notifiable,
+        isFalse,
+      );
     });
   });
 
-  group('upcomingFor — IntervalDaysSchedule', () {
+  group('upcoming — IntervalDaysSchedule', () {
     test('returns `days` future scheduled dates', () {
       final start = Date.today().subtract(const Duration(days: 7));
       final s = schedule(
           scheduling: IntervalDaysSchedule(intervalDays: 7), startDate: start);
+      withSchedules([s]);
 
-      final result = occurrences.upcomingFor(s, days: 3);
+      final result = occurrences.upcoming(days: 3);
 
       expect(result, hasLength(3));
       expect(result.first.date, Date.today());
@@ -219,10 +256,11 @@ void main() {
           id: 7,
           scheduling: IntervalDaysSchedule(intervalDays: 7),
           startDate: start);
+      withSchedules([s]);
       when(intakes.getLastIntakeLocalDateForSchedule(7))
           .thenReturn(Date.today());
 
-      final result = occurrences.upcomingFor(s, days: 2);
+      final result = occurrences.upcoming(days: 2);
 
       expect(result.first.status, ScheduleStatus.taken);
     });
@@ -233,10 +271,11 @@ void main() {
           id: 7,
           scheduling: IntervalDaysSchedule(intervalDays: 7),
           startDate: start);
+      withSchedules([s]);
       when(intakes.getLastIntakeLocalDateForSchedule(7))
           .thenReturn(Date.today());
 
-      final result = occurrences.upcomingFor(s, days: 3);
+      final result = occurrences.upcoming(days: 3);
 
       expect(result.skip(1).map((o) => o.status),
           everyElement(ScheduleStatus.upcoming));
@@ -247,33 +286,36 @@ void main() {
       final s = schedule(
           scheduling:
               IntervalDaysSchedule(intervalDays: 1, notificationTime: t));
+      withSchedules([s]);
 
-      final result = occurrences.upcomingFor(s, days: 3);
+      final result = occurrences.upcoming(days: 3);
 
-      expect(result.map((o) => o.time), everyElement(t));
+      expect(result.map((o) => o.notificationTime), everyElement(t));
     });
 
     test('notifiable mirrors notificationTime presence', () {
       final withoutTime =
           schedule(scheduling: IntervalDaysSchedule(intervalDays: 1));
+      withSchedules([withoutTime]);
 
-      final result = occurrences.upcomingFor(withoutTime, days: 2);
+      final result = occurrences.upcoming(days: 2);
 
       expect(result.map((o) => o.notifiable), everyElement(isFalse));
     });
   });
 
-  group('upcomingFor — DailySchedule', () {
+  group('upcoming — DailySchedule', () {
     const morning = TimeOfDay(hour: 8, minute: 0);
     const evening = TimeOfDay(hour: 20, minute: 30);
 
     test('emits `days * intakeTimes` occurrences', () {
       final s = schedule(
           scheduling: const DailySchedule(intakeTimes: [morning, evening]));
+      withSchedules([s]);
       when(intakes.getTakenIntakesForScheduleOn(1, Date.today()))
           .thenReturn(<MedicationIntake>[]);
 
-      final result = occurrences.upcomingFor(s, days: 3);
+      final result = occurrences.upcoming(days: 3);
 
       expect(result, hasLength(6));
     });
@@ -282,10 +324,11 @@ void main() {
       final morningIntake = intakeAt(morning, id: 1);
       final s = schedule(
           scheduling: const DailySchedule(intakeTimes: [morning, evening]));
+      withSchedules([s]);
       when(intakes.getTakenIntakesForScheduleOn(1, Date.today()))
           .thenReturn([morningIntake]);
 
-      final result = occurrences.upcomingFor(s, days: 1);
+      final result = occurrences.upcoming(days: 1);
 
       expect(result.first.status, ScheduleStatus.taken);
       expect(result.first.intake, morningIntake);
@@ -296,10 +339,11 @@ void main() {
       final morningIntake = intakeAt(morning, id: 1);
       final s =
           schedule(scheduling: const DailySchedule(intakeTimes: [morning]));
+      withSchedules([s]);
       when(intakes.getTakenIntakesForScheduleOn(1, Date.today()))
           .thenReturn([morningIntake]);
 
-      final result = occurrences.upcomingFor(s, days: 3);
+      final result = occurrences.upcoming(days: 3);
 
       expect(result.skip(1).map((o) => o.status),
           everyElement(ScheduleStatus.upcoming));
@@ -310,9 +354,10 @@ void main() {
       final silent = schedule(
           scheduling:
               const DailySchedule(intakeTimes: [morning], notify: false));
+      withSchedules([silent]);
       when(intakes.getTakenIntakesForScheduleOn(any, any)).thenReturn([]);
 
-      final result = occurrences.upcomingFor(silent, days: 3);
+      final result = occurrences.upcoming(days: 3);
 
       expect(result.map((o) => o.notifiable), everyElement(isFalse));
     });

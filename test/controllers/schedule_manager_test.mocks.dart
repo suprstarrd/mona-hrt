@@ -3,15 +3,9 @@
 // Do not manually edit this file.
 
 // ignore_for_file: no_leading_underscores_for_library_prefixes
-import 'dart:async' as _i5;
-import 'dart:ui' as _i6;
-
 import 'package:mockito/mockito.dart' as _i1;
-import 'package:mona/controllers/occurrences_manager.dart' as _i7;
-import 'package:mona/data/model/medication_schedule.dart' as _i4;
-import 'package:mona/data/model/scheduled_occurrence.dart' as _i8;
-import 'package:mona/data/providers/medication_schedule_provider.dart' as _i3;
-import 'package:mona/services/repository.dart' as _i2;
+import 'package:mona/controllers/occurrences_manager.dart' as _i2;
+import 'package:mona/data/model/scheduled_occurrence.dart' as _i3;
 
 // ignore_for_file: type=lint
 // ignore_for_file: avoid_redundant_argument_values
@@ -28,181 +22,30 @@ import 'package:mona/services/repository.dart' as _i2;
 // ignore_for_file: subtype_of_sealed_class
 // ignore_for_file: invalid_use_of_internal_member
 
-class _FakeRepository_0<T> extends _i1.SmartFake implements _i2.Repository<T> {
-  _FakeRepository_0(
-    Object parent,
-    Invocation parentInvocation,
-  ) : super(
-          parent,
-          parentInvocation,
-        );
-}
-
-/// A class which mocks [MedicationScheduleProvider].
-///
-/// See the documentation for Mockito's code generation for more information.
-class MockMedicationScheduleProvider extends _i1.Mock
-    implements _i3.MedicationScheduleProvider {
-  @override
-  _i2.Repository<_i4.MedicationSchedule> get repository => (super.noSuchMethod(
-        Invocation.getter(#repository),
-        returnValue: _FakeRepository_0<_i4.MedicationSchedule>(
-          this,
-          Invocation.getter(#repository),
-        ),
-        returnValueForMissingStub: _FakeRepository_0<_i4.MedicationSchedule>(
-          this,
-          Invocation.getter(#repository),
-        ),
-      ) as _i2.Repository<_i4.MedicationSchedule>);
-
-  @override
-  List<_i4.MedicationSchedule> get schedules => (super.noSuchMethod(
-        Invocation.getter(#schedules),
-        returnValue: <_i4.MedicationSchedule>[],
-        returnValueForMissingStub: <_i4.MedicationSchedule>[],
-      ) as List<_i4.MedicationSchedule>);
-
-  @override
-  bool get isLoading => (super.noSuchMethod(
-        Invocation.getter(#isLoading),
-        returnValue: false,
-        returnValueForMissingStub: false,
-      ) as bool);
-
-  @override
-  bool get hasListeners => (super.noSuchMethod(
-        Invocation.getter(#hasListeners),
-        returnValue: false,
-        returnValueForMissingStub: false,
-      ) as bool);
-
-  @override
-  _i4.MedicationSchedule? getScheduleById(int? id) => (super.noSuchMethod(
-        Invocation.method(
-          #getScheduleById,
-          [id],
-        ),
-        returnValueForMissingStub: null,
-      ) as _i4.MedicationSchedule?);
-
-  @override
-  _i5.Future<void> fetchSchedules() => (super.noSuchMethod(
-        Invocation.method(
-          #fetchSchedules,
-          [],
-        ),
-        returnValue: _i5.Future<void>.value(),
-        returnValueForMissingStub: _i5.Future<void>.value(),
-      ) as _i5.Future<void>);
-
-  @override
-  _i5.Future<void> deleteScheduleFromId(int? id) => (super.noSuchMethod(
-        Invocation.method(
-          #deleteScheduleFromId,
-          [id],
-        ),
-        returnValue: _i5.Future<void>.value(),
-        returnValueForMissingStub: _i5.Future<void>.value(),
-      ) as _i5.Future<void>);
-
-  @override
-  _i5.Future<void> deleteSchedule(_i4.MedicationSchedule? schedule) =>
-      (super.noSuchMethod(
-        Invocation.method(
-          #deleteSchedule,
-          [schedule],
-        ),
-        returnValue: _i5.Future<void>.value(),
-        returnValueForMissingStub: _i5.Future<void>.value(),
-      ) as _i5.Future<void>);
-
-  @override
-  _i5.Future<void> add(_i4.MedicationSchedule? schedule) => (super.noSuchMethod(
-        Invocation.method(
-          #add,
-          [schedule],
-        ),
-        returnValue: _i5.Future<void>.value(),
-        returnValueForMissingStub: _i5.Future<void>.value(),
-      ) as _i5.Future<void>);
-
-  @override
-  _i5.Future<void> updateSchedule(_i4.MedicationSchedule? schedule) =>
-      (super.noSuchMethod(
-        Invocation.method(
-          #updateSchedule,
-          [schedule],
-        ),
-        returnValue: _i5.Future<void>.value(),
-        returnValueForMissingStub: _i5.Future<void>.value(),
-      ) as _i5.Future<void>);
-
-  @override
-  void addListener(_i6.VoidCallback? listener) => super.noSuchMethod(
-        Invocation.method(
-          #addListener,
-          [listener],
-        ),
-        returnValueForMissingStub: null,
-      );
-
-  @override
-  void removeListener(_i6.VoidCallback? listener) => super.noSuchMethod(
-        Invocation.method(
-          #removeListener,
-          [listener],
-        ),
-        returnValueForMissingStub: null,
-      );
-
-  @override
-  void dispose() => super.noSuchMethod(
-        Invocation.method(
-          #dispose,
-          [],
-        ),
-        returnValueForMissingStub: null,
-      );
-
-  @override
-  void notifyListeners() => super.noSuchMethod(
-        Invocation.method(
-          #notifyListeners,
-          [],
-        ),
-        returnValueForMissingStub: null,
-      );
-}
-
 /// A class which mocks [OccurrencesManager].
 ///
 /// See the documentation for Mockito's code generation for more information.
 class MockOccurrencesManager extends _i1.Mock
-    implements _i7.OccurrencesManager {
+    implements _i2.OccurrencesManager {
   @override
-  List<_i8.ScheduledOccurrence> currentFor(_i4.MedicationSchedule? schedule) =>
-      (super.noSuchMethod(
+  List<_i3.ScheduledOccurrence> current() => (super.noSuchMethod(
         Invocation.method(
-          #currentFor,
-          [schedule],
+          #current,
+          [],
         ),
-        returnValue: <_i8.ScheduledOccurrence>[],
-        returnValueForMissingStub: <_i8.ScheduledOccurrence>[],
-      ) as List<_i8.ScheduledOccurrence>);
+        returnValue: <_i3.ScheduledOccurrence>[],
+        returnValueForMissingStub: <_i3.ScheduledOccurrence>[],
+      ) as List<_i3.ScheduledOccurrence>);
 
   @override
-  List<_i8.ScheduledOccurrence> upcomingFor(
-    _i4.MedicationSchedule? schedule, {
-    required int? days,
-  }) =>
+  List<_i3.ScheduledOccurrence> upcoming({required int? days}) =>
       (super.noSuchMethod(
         Invocation.method(
-          #upcomingFor,
-          [schedule],
+          #upcoming,
+          [],
           {#days: days},
         ),
-        returnValue: <_i8.ScheduledOccurrence>[],
-        returnValueForMissingStub: <_i8.ScheduledOccurrence>[],
-      ) as List<_i8.ScheduledOccurrence>);
+        returnValue: <_i3.ScheduledOccurrence>[],
+        returnValueForMissingStub: <_i3.ScheduledOccurrence>[],
+      ) as List<_i3.ScheduledOccurrence>);
 }

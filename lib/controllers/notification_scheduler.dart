@@ -2,7 +2,6 @@ import 'package:intl/intl.dart';
 import 'package:mona/controllers/occurrences_manager.dart';
 import 'package:mona/data/model/medication_schedule.dart';
 import 'package:mona/data/model/scheduling_strategy.dart';
-import 'package:mona/data/providers/medication_schedule_provider.dart';
 import 'package:mona/l10n/app_localizations.dart';
 import 'package:mona/services/notification_service.dart';
 import 'package:mona/services/preferences_service.dart';
@@ -10,31 +9,23 @@ import 'package:mona/services/preferences_service.dart';
 class NotificationScheduler {
   static const int _numberOfDays = 5;
 
-  final MedicationScheduleProvider medicationScheduleProvider;
-  final OccurrencesManager scheduleOccurrences;
+  final OccurrencesManager occurencesManager;
   final PreferencesService preferencesService;
 
-  NotificationScheduler(
-    this.medicationScheduleProvider,
-    this.scheduleOccurrences,
-    this.preferencesService,
-  );
+  NotificationScheduler(this.occurencesManager, this.preferencesService);
 
   List<_ScheduledNotification> _getScheduledNotifications() {
     final notifications = <_ScheduledNotification>[];
     final now = DateTime.now();
 
-    for (final schedule in medicationScheduleProvider.schedules) {
-      for (final occ in scheduleOccurrences.upcomingFor(
-        schedule,
-        days: _numberOfDays,
-      )) {
-        if (!occ.notifiable) continue;
-        if (occ.status == ScheduleStatus.taken) continue;
-        final dt = occ.localDateTime;
-        if (dt == null || now.isAfter(dt)) continue;
-        notifications.add((dateTime: dt, schedule: schedule));
-      }
+    for (final occ in occurencesManager.upcoming(days: _numberOfDays)) {
+      if (!occ.notifiable) continue;
+      if (occ.status == ScheduleStatus.taken) continue;
+      final dt = occ.notificationDateTime;
+      if (dt == null || now.isAfter(dt)) continue;
+      final includeTime = occ.time != null;
+      notifications.add(
+          (dateTime: dt, schedule: occ.schedule, includeTime: includeTime));
     }
 
     return notifications;
@@ -48,7 +39,9 @@ class NotificationScheduler {
       return;
     }
 
-    final scheduledDateTimeFormat = DateFormat.MMMMd(localeName);
+    final scheduledDateFormat = DateFormat.MMMMd(localeName);
+    final scheduledDateTimeFormat = DateFormat.MMMMd(localeName)
+        .addPattern(DateFormat.Hm(localeName).pattern);
 
     final scheduledNotifications = _getScheduledNotifications();
 
@@ -56,11 +49,14 @@ class NotificationScheduler {
       scheduledNotifications.map((entry) {
         final dateTime = entry.dateTime;
         final schedule = entry.schedule;
+        final includeTime = entry.includeTime;
 
         return NotificationService().scheduleNotification(
           title: l10n.notificationMedicationReminderTitle(schedule.name),
           body: l10n.notificationMedicationReminderBody(
-            scheduledDateTimeFormat.format(dateTime),
+            includeTime
+                ? scheduledDateTimeFormat.format(dateTime)
+                : scheduledDateFormat.format(dateTime),
           ),
           year: dateTime.year,
           month: dateTime.month,
@@ -76,4 +72,5 @@ class NotificationScheduler {
 typedef _ScheduledNotification = ({
   DateTime dateTime,
   MedicationSchedule schedule,
+  bool includeTime,
 });

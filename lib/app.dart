@@ -75,8 +75,8 @@ class _MonaAppState extends State<MonaApp> with WidgetsBindingObserver {
     if (!mounted) return;
 
     NotificationScheduler(
-      _medicationScheduleProvider,
-      OccurrencesManager(_medicationIntakeProvider),
+      OccurrencesManager(
+          _medicationIntakeProvider, _medicationScheduleProvider),
       _preferencesService,
     ).regenerateAll(l10n, locale.toLanguageTag());
   }

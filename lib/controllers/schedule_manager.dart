@@ -3,7 +3,6 @@ import 'package:mona/controllers/occurrences_manager.dart';
 import 'package:mona/data/model/medication_intake.dart';
 import 'package:mona/data/model/medication_schedule.dart';
 import 'package:mona/data/model/scheduling_strategy.dart';
-import 'package:mona/data/providers/medication_schedule_provider.dart';
 
 class ScheduleSlot {
   final MedicationSchedule schedule;
@@ -20,20 +19,18 @@ class ScheduleSlot {
 }
 
 class ScheduleManager {
-  final MedicationScheduleProvider _scheduleProvider;
   final OccurrencesManager _occurrences;
 
-  ScheduleManager(this._scheduleProvider, this._occurrences);
+  ScheduleManager(this._occurrences);
 
   List<ScheduleSlot> getSlots() => [
-        for (final schedule in _scheduleProvider.schedules)
-          for (final occ in _occurrences.currentFor(schedule))
-            ScheduleSlot(
-              schedule: schedule,
-              status: occ.status,
-              time: occ.time,
-              intake: occ.intake,
-            ),
+        for (final entry in _occurrences.current())
+          ScheduleSlot(
+            schedule: entry.schedule,
+            status: entry.status,
+            time: entry.time,
+            intake: entry.intake,
+          ),
       ];
 
   ({List<ScheduleSlot> today, List<ScheduleSlot> upcoming}) splitSlotsByDay() {

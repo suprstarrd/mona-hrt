@@ -4,31 +4,46 @@ import 'package:mona/data/model/medication_schedule.dart';
 import 'package:mona/data/model/scheduled_occurrence.dart';
 import 'package:mona/data/model/scheduling_strategy.dart';
 import 'package:mona/data/providers/medication_intake_provider.dart';
+import 'package:mona/data/providers/medication_schedule_provider.dart';
 
 class OccurrencesManager {
-  final MedicationIntakeProvider _intakes;
+  final MedicationIntakeProvider _medicationIntakeProvider;
+  final MedicationScheduleProvider _medicationScheduleProvider;
 
-  const OccurrencesManager(this._intakes);
+  const OccurrencesManager(
+      this._medicationIntakeProvider, this._medicationScheduleProvider);
 
-  List<ScheduledOccurrence> currentFor(MedicationSchedule schedule) {
-    switch (schedule.scheduling) {
-      case IntervalDaysSchedule s:
-        return _interval(schedule, s, [Date.today()]);
-      case DailySchedule s:
-        return _daily(schedule, s, 1);
+  List<ScheduledOccurrence> current() {
+    final schedules = _medicationScheduleProvider.schedules;
+    final occurrences = <ScheduledOccurrence>[];
+
+    for (final schedule in schedules) {
+      switch (schedule.scheduling) {
+        case IntervalDaysSchedule s:
+          occurrences.addAll(_interval(schedule, s, [Date.today()]));
+        case DailySchedule s:
+          occurrences.addAll(_daily(schedule, s, 1));
+      }
     }
+
+    return occurrences;
   }
 
-  List<ScheduledOccurrence> upcomingFor(
-    MedicationSchedule schedule, {
-    required int days,
-  }) {
-    switch (schedule.scheduling) {
-      case IntervalDaysSchedule s:
-        return _interval(schedule, s, s.getNextDates(schedule.startDate, days));
-      case DailySchedule s:
-        return _daily(schedule, s, days);
+  List<ScheduledOccurrence> upcoming({required int days}) {
+    final schedules = _medicationScheduleProvider.schedules;
+    final occurrences = <ScheduledOccurrence>[];
+
+    for (final schedule in schedules) {
+      switch (schedule.scheduling) {
+        case IntervalDaysSchedule s:
+          occurrences.addAll(
+              _interval(schedule, s, s.getNextDates(schedule.startDate, days)));
+        case DailySchedule s:
+          occurrences.addAll(_daily(schedule, s, days));
+      }
     }
+
+    return occurrences;
   }
 
   List<ScheduledOccurrence> _interval(
@@ -36,18 +51,21 @@ class OccurrencesManager {
     IntervalDaysSchedule s,
     List<Date> dates,
   ) {
-    final lastDate = _intakes.getLastIntakeLocalDateForSchedule(schedule.id);
-    final lastIntake = _intakes.getLastTakenIntakeForSchedule(schedule.id);
+    final lastTaken = _medicationIntakeProvider
+        .getLastIntakeLocalDateForSchedule(schedule.id);
+    final lastIntake =
+        _medicationIntakeProvider.getLastTakenIntakeForSchedule(schedule.id);
     final notifiable = s.notificationTime != null;
 
     return [
       for (final date in dates)
         () {
           final status = s.statusFor(
-              startDate: schedule.startDate, date: date, lastTaken: lastDate);
+              startDate: schedule.startDate, date: date, lastTaken: lastTaken);
           return ScheduledOccurrence(
+            schedule: schedule,
             date: date,
-            time: s.notificationTime,
+            notificationTime: s.notificationTime,
             status: status,
             intake: status == ScheduleStatus.taken ? lastIntake : null,
             notifiable: notifiable,
@@ -62,8 +80,8 @@ class OccurrencesManager {
     int days,
   ) {
     final today = Date.today();
-    final takenToday =
-        _intakes.getTakenIntakesForScheduleOn(schedule.id, today);
+    final takenToday = _medicationIntakeProvider.getTakenIntakesForScheduleOn(
+        schedule.id, today);
 
     return [
       for (var i = 0; i < days; i++)
@@ -74,8 +92,10 @@ class OccurrencesManager {
                 ? takenToday.firstWhereOrNull((it) => it.scheduledTime == time)
                 : null;
             return ScheduledOccurrence(
+              schedule: schedule,
               date: date,
               time: time,
+              notificationTime: time,
               status: s.statusFor(date: date, matchedIntake: match),
               intake: match,
               notifiable: s.notify,
