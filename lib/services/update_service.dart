@@ -96,7 +96,8 @@ class UpdateService {
     if (apkAssets.isEmpty) return null;
 
     for (var asset in apkAssets) {
-      if (asset['name'].toString().toLowerCase().contains('mona-')) {
+      final assetName = asset['name'].toString().toLowerCase();
+      if (assetName.contains('mona-') && !assetName.contains('store')) {
         return asset;
       }
     }
