@@ -197,9 +197,9 @@ jobs:
           path: build/app/outputs/flutter-apk/mona-*.apk
           retention-days: 7
 
-  # ── Build Android release App Bundle (signed, Play Store) ─────────────────
+  # ── Build Android release App Bundle + split-per-ABI APKs (signed, Play) ──
   build_android_play:
-    name: Build Android AAB (play, signed)
+    name: Build Android AAB and APKs (play, signed)
     runs-on: ubuntu-latest
     needs: [bump_version]
 
@@ -242,6 +242,9 @@ jobs:
       - name: Build release App Bundle
         run: flutter build appbundle --release --flavor play
 
+      - name: Build release APKs (split per ABI)
+        run: flutter build apk --release --flavor play --split-per-abi
+
       - name: Clean up signing files
         if: always()
         run: |
@@ -253,6 +256,16 @@ jobs:
           VERSION="${GITHUB_REF_NAME#v}"
           mv build/app/outputs/bundle/playRelease/app-play-release.aab "build/app/outputs/bundle/playRelease/mona-${VERSION}.aab"
 
+      # Rename per-ABI APKs to mona-store-<abi>.apk
+      - name: Rename per-ABI APKs
+        run: |
+          cd build/app/outputs/flutter-apk
+          for f in app-*-play-release.apk; do
+            abi="${f#app-}"
+            abi="${abi%-play-release.apk}"
+            mv "$f" "mona-store-${abi}.apk"
+          done
+
       - name: Upload AAB artifact
         uses: actions/upload-artifact@v6
         with:
@@ -260,11 +273,18 @@ jobs:
           path: build/app/outputs/bundle/playRelease/mona-*.aab
           retention-days: 7
 
+      - name: Upload play APK artifacts
+        uses: actions/upload-artifact@v6
+        with:
+          name: android-release-apk-play
+          path: build/app/outputs/flutter-apk/mona-store-*.apk
+          retention-days: 7
+
   # ── GitHub Release ─────────────────────────────────────────────────────────
   create_release:
     name: Create GitHub Release
     runs-on: ubuntu-latest
-    needs: [build_android_standalone]
+    needs: [build_android_standalone, build_android_play]
     permissions:
       contents: write
 
@@ -275,7 +295,13 @@ jobs:
           name: android-release-apk-standalone
           path: artifacts/
 
-      # Create the release and attach the APK.
+      - name: Download play split-per-ABI APK artifacts
+        uses: actions/download-artifact@v6
+        with:
+          name: android-release-apk-play
+          path: artifacts/
+
+      # Create the release and attach the APKs.
       # The tag name becomes the release title (e.g. "v1.2.3").
       - name: Create release and upload APKs
         uses: softprops/action-gh-release@v2
