@@ -110,11 +110,6 @@ void main() {
     NotificationService.createPlugin = origCreatePlugin;
   });
 
-  NotificationScheduler buildScheduler() => NotificationScheduler(
-        occurrences,
-        preferences,
-      );
-
   VerificationResult verifyScheduled({String? title, Matcher? body}) =>
       verify(plugin.zonedSchedule(
         id: anyNamed('id'),
@@ -145,8 +140,9 @@ void main() {
         notificationDetails: anyNamed('notificationDetails'),
         payload: anyNamed('payload'),
       )).thenAnswer((_) async {});
+      final sut = NotificationScheduler(occurrences, preferences);
 
-      await buildScheduler().regenerateAll(l10n, 'en');
+      await sut.regenerateAll(l10n, 'en');
 
       verify(plugin.show(
         id: anyNamed('id'),
@@ -167,8 +163,9 @@ void main() {
       when(plugin.pendingNotificationRequests())
           .thenAnswer((_) async => [pending]);
       when(plugin.cancel(id: anyNamed('id'))).thenAnswer((_) async {});
+      final sut = NotificationScheduler(occurrences, preferences);
 
-      await buildScheduler().regenerateAll(l10n, l10n.localeName);
+      await sut.regenerateAll(l10n, l10n.localeName);
 
       verify(plugin.cancel(id: anyNamed('id'))).called(1);
     });
@@ -177,8 +174,9 @@ void main() {
   group('regenerateAll', () {
     test('returns early when notifications are disabled', () async {
       when(preferences.notificationsEnabled).thenReturn(false);
+      final sut = NotificationScheduler(occurrences, preferences);
 
-      await buildScheduler().regenerateAll(l10n, l10n.localeName);
+      await sut.regenerateAll(l10n, l10n.localeName);
 
       verifyNever(occurrences.upcoming(days: anyNamed('days')));
       verifyNever(plugin.zonedSchedule(
@@ -202,8 +200,9 @@ void main() {
         occurrence(
             schedule: s, date: Date.today().add(const Duration(days: 3))),
       ]);
+      final sut = NotificationScheduler(occurrences, preferences);
 
-      await buildScheduler().regenerateAll(l10n, l10n.localeName);
+      await sut.regenerateAll(l10n, l10n.localeName);
 
       verifyScheduled().called(3);
     });
@@ -218,8 +217,9 @@ void main() {
         occurrence(
             schedule: s, date: Date.today().add(const Duration(days: 2))),
       ]);
+      final sut = NotificationScheduler(occurrences, preferences);
 
-      await buildScheduler().regenerateAll(l10n, l10n.localeName);
+      await sut.regenerateAll(l10n, l10n.localeName);
 
       verifyScheduled().called(1);
     });
@@ -234,8 +234,9 @@ void main() {
         occurrence(
             schedule: s, date: Date.today().add(const Duration(days: 2))),
       ]);
+      final sut = NotificationScheduler(occurrences, preferences);
 
-      await buildScheduler().regenerateAll(l10n, l10n.localeName);
+      await sut.regenerateAll(l10n, l10n.localeName);
 
       verifyScheduled().called(1);
     });
@@ -250,8 +251,9 @@ void main() {
         occurrence(
             schedule: s, date: Date.today().add(const Duration(days: 2))),
       ]);
+      final sut = NotificationScheduler(occurrences, preferences);
 
-      await buildScheduler().regenerateAll(l10n, l10n.localeName);
+      await sut.regenerateAll(l10n, l10n.localeName);
 
       verifyScheduled().called(1);
     });
@@ -269,8 +271,9 @@ void main() {
           notificationTime: const TimeOfDay(hour: 8, minute: 30),
         ),
       ]);
+      final sut = NotificationScheduler(occurrences, preferences);
 
-      await buildScheduler().regenerateAll(l10n, l10n.localeName);
+      await sut.regenerateAll(l10n, l10n.localeName);
 
       final expectedDate = DateFormat.MMMMd(l10n.localeName)
           .format(DateTime(date.year, date.month, date.day));
@@ -291,8 +294,9 @@ void main() {
             time: const TimeOfDay(hour: 8, minute: 30),
             notificationTime: const TimeOfDay(hour: 8, minute: 30)),
       ]);
+      final sut = NotificationScheduler(occurrences, preferences);
 
-      await buildScheduler().regenerateAll(l10n, l10n.localeName);
+      await sut.regenerateAll(l10n, l10n.localeName);
 
       final expectedDate = DateFormat.MMMMd(l10n.localeName)
           .addPattern(DateFormat.Hm(l10n.localeName).pattern)
@@ -314,8 +318,9 @@ void main() {
         occurrence(schedule: s, date: Date.today(), time: pastTime),
         occurrence(schedule: s, date: Date.today(), time: futureTime),
       ]);
+      final sut = NotificationScheduler(occurrences, preferences);
 
-      await buildScheduler().regenerateAll(l10n, l10n.localeName);
+      await sut.regenerateAll(l10n, l10n.localeName);
 
       verifyScheduled().called(1);
     });
@@ -323,8 +328,9 @@ void main() {
     test('titles notifications with the schedule name', () async {
       final s = schedule(name: 'My Med');
       when(occurrences.upcoming(days: 5)).thenReturn([occurrence(schedule: s)]);
+      final sut = NotificationScheduler(occurrences, preferences);
 
-      await buildScheduler().regenerateAll(l10n, l10n.localeName);
+      await sut.regenerateAll(l10n, l10n.localeName);
 
       verifyScheduled(title: l10n.notificationMedicationReminderTitle('My Med'))
           .called(1);
@@ -337,8 +343,9 @@ void main() {
         occurrence(schedule: a),
         occurrence(schedule: b),
       ]);
+      final sut = NotificationScheduler(occurrences, preferences);
 
-      await buildScheduler().regenerateAll(l10n, l10n.localeName);
+      await sut.regenerateAll(l10n, l10n.localeName);
 
       verifyScheduled(title: l10n.notificationMedicationReminderTitle('A'))
           .called(1);
