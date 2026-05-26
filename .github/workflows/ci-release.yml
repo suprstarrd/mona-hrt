@@ -236,11 +236,21 @@ jobs:
         env:
           TAG: ${{ needs.prepare.outputs.tag }}
         run: |
-          git config user.name  "délia"
-          git config user.email "delia@cheminot.net"
+          sudo apt install expect
+          echo '${{secrets.GPG_KEY_CONTENTS}}' | base64 -d > publish_key.gpg
+          gpg --quiet --batch --yes --decrypt --passphrase="${{secrets.SECRET_PASSPHRASE}}" --output secret.gpg publish_key.gpg
+          gpg --quiet --import --batch --passphrase="${{secrets.SIGNING_PASSWORD}}" secret.gpg
+          expect -c 'spawn gpg --edit-key BA34A6AFB47C22EA20DC139763FAE152CD3C0F01 trust quit; send "5\ry\r"; expect eof'
+          rm -rf secret.gpg publish_key.gpg
+          git config user.name "The Mona Authors"
+          git config user.email "287803281+MonaHRT@users.noreply.github.com"
+          git config user.signingkey BA34A6AFB47C22EA20DC139763FAE152CD3C0F01
+          git config commit.gpgsign true
+          git config tag.gpgsign true
           git add pubspec.yaml ios/Runner.xcodeproj/project.pbxproj fastlane/metadata/android/en-US/changelogs/
-          git commit -m "chore: release ${TAG}"
-          git tag "${TAG}"
+          git commit -S -m "chore: release ${TAG}" -s
+          git tag -s "${TAG}"
+          git tag -v "${TAG}"
           git push --atomic origin main "refs/tags/${TAG}"
 
   # ── Build Android release APK (standalone) ────────────────────────────────
