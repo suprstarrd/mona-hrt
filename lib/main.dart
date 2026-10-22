@@ -1,24 +1,30 @@
-//   _______
-//  |_     _|.----.---.-.-----.-----.
-//    |   |  |   _|  _  |     |__ --|
-//    |___|  |__| |___._|__|__|_____|
+// SPDX-FileCopyrightText: 2026 Délia Cheminot <delia@cheminot.net>
 //
-//        _____ _______ ___ ___
-//       |     \_     _|   |   |
-//       |  --  ||   |_ \     /
-//       |_____/_______| |___|
+// SPDX-License-Identifier: AGPL-3.0-only
+
+//
+//  ooo        ooooo
+//  `88.       .888'
+//   888b     d'888   .ooooo.  ooo. .oo.    .oooo.
+//   8 Y88. .P  888  d88' `88b `888P"Y88b  `P  )88b
+//   8  `888'   888  888   888  888   888   .oP"888
+//   8    Y     888  888   888  888   888  d8(  888
+//  o8o        o888o `Y8bod8P' o888o o888o `Y888""8o
 //
 
 import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:mona/data/model/date.dart';
 import 'package:mona/data/providers/blood_test_provider.dart';
 import 'package:mona/data/providers/medication_intake_provider.dart';
 import 'package:mona/data/providers/medication_schedule_provider.dart';
 import 'package:mona/data/providers/supply_item_provider.dart';
-import 'package:mona/l10n/locale_provider.dart';
+import 'package:mona/data/providers/today_provider.dart';
+import 'package:mona/i18n/locale_provider.dart';
 import 'package:mona/services/preferences_service.dart';
+import 'package:mona/theme/app_theme_controller.dart';
 import 'package:provider/provider.dart';
 import 'package:timezone/data/latest_all.dart' as tzdata;
 import 'app.dart';
@@ -28,6 +34,7 @@ void main() async {
   tzdata.initializeTimeZones();
 
   final preferencesService = await PreferencesService.init();
+  logicalDayStartMinutes = preferencesService.logicalDayStartMinutesRaw;
 
   if (Platform.isAndroid) {
     SystemChrome.setEnabledSystemUIMode(
@@ -48,9 +55,14 @@ void main() async {
       providers: [
         ChangeNotifierProvider(create: (_) => SupplyItemProvider()),
         ChangeNotifierProvider(create: (_) => MedicationIntakeProvider()),
-        ChangeNotifierProvider(create: (_) => MedicationScheduleProvider()),
+        ChangeNotifierProvider(
+            create: (_) =>
+                MedicationScheduleProvider(preferences: preferencesService)),
         ChangeNotifierProvider(create: (_) => BloodTestProvider()),
+        ChangeNotifierProvider(create: (_) => TodayProvider(), lazy: false),
         ChangeNotifierProvider.value(value: preferencesService),
+        ChangeNotifierProvider(
+            create: (_) => AppThemeProvider(preferencesService)),
         ChangeNotifierProvider(
             create: (_) => LocaleProvider(preferencesService)),
       ],
@@ -59,7 +71,8 @@ void main() async {
   );
 }
 
-//  /|、 meow
-//（ﾟ､ ｡ ７
-//  l  ~ヽ
-//  じしf_,)ノ
+//     .----.   @   @
+//    / .-"-.`.  \v/
+//    | | '\ \ \_/ )
+//  ,-\ `-.' /.'  /
+// '---`----'----'

@@ -1,11 +1,16 @@
+// SPDX-FileCopyrightText: 2026 Délia Cheminot <delia@cheminot.net>
+// SPDX-FileCopyrightText: 2026 Alice Lorido "yakissa" <alice@lori.do>
+//
+// SPDX-License-Identifier: AGPL-3.0-only
+
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:mona/l10n/build_context_extensions.dart';
+import 'package:material_symbols_icons/symbols.dart';
+import 'package:mona/i18n/build_context_extensions.dart';
 import 'package:mona/ui/constants/dimensions.dart';
 
 class FormDateTimeField extends StatelessWidget {
   final DateTime datetime;
-  final DateTime? selectedDatetime;
   final ValueChanged<DateTime> onChanged;
   final String label;
   final String? errorText;
@@ -13,14 +18,13 @@ class FormDateTimeField extends StatelessWidget {
   FormDateTimeField({
     required this.datetime,
     required this.onChanged,
-    this.selectedDatetime,
     required this.label,
     this.errorText,
   });
 
   @override
   Widget build(BuildContext context) {
-    final String locale = context.languageTag;
+    final String locale = context.intlLanguageTag;
     final DateFormat timeFormat = MediaQuery.of(context).alwaysUse24HourFormat
         ? DateFormat.Hm(locale)
         : DateFormat.jm(locale);
@@ -38,8 +42,8 @@ class FormDateTimeField extends StatelessWidget {
                 labelText: label,
                 errorText: errorText,
                 suffixIcon: errorText != null
-                    ? Icon(Icons.error)
-                    : Icon(Icons.calendar_today),
+                    ? Icon(Symbols.error_rounded)
+                    : Icon(Symbols.calendar_today_rounded),
               ),
               readOnly: true,
               onTap: () => _selectDate(context),
@@ -54,8 +58,8 @@ class FormDateTimeField extends StatelessWidget {
                 border: OutlineInputBorder(),
                 errorText: errorText,
                 suffixIcon: errorText != null
-                    ? Icon(Icons.error)
-                    : Icon(Icons.access_time),
+                    ? Icon(Symbols.error_rounded)
+                    : Icon(Symbols.access_time_rounded),
               ),
               readOnly: true,
               onTap: () => _selectTime(context),
@@ -69,8 +73,8 @@ class FormDateTimeField extends StatelessWidget {
   Future<void> _selectDate(BuildContext context) async {
     DateTime? picked = await showDatePicker(
       context: context,
-      initialDate: selectedDatetime ?? DateTime.now(),
-      firstDate: DateTime(2000),
+      initialDate: datetime,
+      firstDate: DateTime(1900),
       lastDate: DateTime(2100),
     );
 

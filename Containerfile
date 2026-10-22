@@ -1,3 +1,10 @@
+# SPDX-FileCopyrightText: 2026 Alice Boars "VirtualFreeEx" <contact@ffi.lol>
+#
+# SPDX-LicenseIdentifier: AGPL-3.0-only
+
+# SPDX-SnippetBegin
+# SPDX-License-Identifier: MIT
+# SPDX-SnippetCopyrightText: 2019 Leo Farias
 # --- BEGIN THIRD-PARTY CODE NOTICE ---
 # The snippet below is taken directly from the Flutter Version Manager project,
 # which is licensed under the MIT license. Below is a copy of that license
@@ -39,14 +46,21 @@ RUN apt-get update && apt-get install -y curl git unzip xz-utils zip \
 RUN dart compile exe bin/main.dart -o /out/fvm
 RUN /out/fvm --version
 # --- END THIRD-PARTY CODE ---
+# SPDX-SnippetEnd
 
 FROM docker.io/library/fedora:latest AS development
 
-# install OpenJDK, CMake; Copy FVM and the SDK.
+# Install Android-specific dependencies.
 RUN dnf in java-25-openjdk-devel java-25-openjdk java-25-openjdk-src \
     --assumeyes
-COPY --from=fvm /out/fvm /usr/bin/fvm
 COPY --from=docker.io/runmymind/docker-android-sdk:latest \
     /opt/android-sdk-linux /opt/android-sdk-linux
 ENV ANDROID_HOME=/opt/android-sdk-linux
+ENV ANDROID_SDK_ROOT=/opt/android-sdk-linux
+
+# Install Linux-specific dependencies.
+RUN dnf in cmake clang ninja gtk3-devel glib2-devel --assumeyes
+
+# Finalise.
+COPY --from=fvm /out/fvm /usr/bin/fvm
 USER vscode

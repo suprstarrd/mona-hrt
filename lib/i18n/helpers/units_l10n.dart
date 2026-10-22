@@ -1,0 +1,39 @@
+// SPDX-FileCopyrightText: 2026 Délia Cheminot <delia@cheminot.net>
+//
+// SPDX-License-Identifier: AGPL-3.0-only
+
+import 'package:mona/data/model/units.dart';
+import 'package:mona/i18n/translations.g.dart';
+
+extension EstradiolUnitL10n on EstradiolUnit {
+  String get localizedName {
+    switch (this) {
+      case EstradiolUnit.pg_mL:
+        return t.unitPgPerMl;
+      case EstradiolUnit.pmol_L:
+        return t.unitPmolPerL;
+    }
+  }
+}
+
+extension TestosteroneUnitL10n on TestosteroneUnit {
+  String get localizedName {
+    switch (this) {
+      case TestosteroneUnit.ng_dL:
+        return t.unitNgPerDl;
+      case TestosteroneUnit.nmol_L:
+        return t.unitNmolPerL;
+      case TestosteroneUnit.ng_mL:
+        return t.unitNgPerMl;
+    }
+  }
+}
+
+extension UnitL10n on Unit {
+  String get localizedName {
+    final unit = this;
+    if (unit is EstradiolUnit) return unit.localizedName;
+    if (unit is TestosteroneUnit) return unit.localizedName;
+    return name;
+  }
+}

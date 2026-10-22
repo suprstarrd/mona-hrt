@@ -1,13 +1,13 @@
-import 'package:flutter/material.dart';
+// SPDX-FileCopyrightText: 2026 Délia Cheminot <delia@cheminot.net>
+//
+// SPDX-License-Identifier: AGPL-3.0-only
+
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mona/data/model/administration_route.dart';
 import 'package:mona/data/model/molecule.dart';
-import 'package:mona/l10n/app_localizations_en.dart';
 import 'package:mona/util/validators.dart';
 
 void main() {
-  final l10n = AppLocalizationsEn();
-
   group('validators', () {
     test('requiredString works correctly', () {
       // Arrange
@@ -19,9 +19,8 @@ void main() {
       ];
 
       // Act
-      final results = cases
-          .map((c) => requiredString(l10n, c['value'] as String?))
-          .toList();
+      final results =
+          cases.map((c) => requiredString(c['value'] as String?)).toList();
       final expected = cases.map((c) => c['expected'] as Matcher).toList();
 
       // Assert
@@ -32,13 +31,12 @@ void main() {
       // Arrange
       final cases = [
         {'value': null, 'expected': isNotNull},
-        {'value': DateTime.now(), 'expected': isNull},
+        {'value': DateTime(2026, 6, 1, 12, 0), 'expected': isNull},
       ];
 
       // Act
-      final results = cases
-          .map((c) => requiredDateTime(l10n, c['value'] as DateTime?))
-          .toList();
+      final results =
+          cases.map((c) => requiredDateTime(c['value'] as DateTime?)).toList();
       final expected = cases.map((c) => c['expected'] as Matcher).toList();
 
       // Assert
@@ -53,9 +51,8 @@ void main() {
       ];
 
       // Act
-      final results = cases
-          .map((c) => requiredMolecule(l10n, c['value'] as Molecule?))
-          .toList();
+      final results =
+          cases.map((c) => requiredMolecule(c['value'] as Molecule?)).toList();
       final expected = cases.map((c) => c['expected'] as Matcher).toList();
 
       // Assert
@@ -72,7 +69,6 @@ void main() {
       // Act
       final results = cases
           .map((c) => requiredAdministrationRoute(
-                l10n,
                 c['value'] as AdministrationRoute?,
               ))
           .toList();
@@ -115,7 +111,7 @@ void main() {
 
       // Act
       final results = cases
-          .map((c) => strictlyPositiveDecimal(l10n, c['value'] as String?))
+          .map((c) => strictlyPositiveDecimal(c['value'] as String?))
           .toList();
       final expected = cases.map((c) => c['expected'] as Matcher).toList();
 
@@ -155,9 +151,8 @@ void main() {
       ];
 
       // Act
-      final results = cases
-          .map((c) => positiveDecimal(l10n, c['value'] as String?))
-          .toList();
+      final results =
+          cases.map((c) => positiveDecimal(c['value'] as String?)).toList();
       final expected = cases.map((c) => c['expected'] as Matcher).toList();
 
       // Assert
@@ -196,7 +191,7 @@ void main() {
 
       // Act
       final results =
-          cases.map((c) => positiveInt(l10n, c['value'] as String?)).toList();
+          cases.map((c) => positiveInt(c['value'] as String?)).toList();
       final expected = cases.map((c) => c['expected'] as Matcher).toList();
 
       // Assert
@@ -236,8 +231,7 @@ void main() {
 
       // Act
       final results = cases
-          .map((c) =>
-              requiredStrictlyPositiveDecimal(l10n, c['value'] as String?))
+          .map((c) => requiredStrictlyPositiveDecimal(c['value'] as String?))
           .toList();
       final expected = cases.map((c) => c['expected'] as Matcher).toList();
 
@@ -278,7 +272,7 @@ void main() {
 
       // Act
       final results = cases
-          .map((c) => requiredPositiveDecimal(l10n, c['value'] as String?))
+          .map((c) => requiredPositiveDecimal(c['value'] as String?))
           .toList();
       final expected = cases.map((c) => c['expected'] as Matcher).toList();
 
@@ -317,36 +311,31 @@ void main() {
       ];
 
       // Act
-      final results = cases
-          .map((c) => requiredPositiveInt(l10n, c['value'] as String?))
-          .toList();
+      final results =
+          cases.map((c) => requiredPositiveInt(c['value'] as String?)).toList();
       final expected = cases.map((c) => c['expected'] as Matcher).toList();
 
       // Assert
       expect(results, expected);
     });
 
-    test('requiredListOfTimes works correctly', () {
+    test('requiredList works correctly', () {
       // Arrange
       final cases = [
-        {'value': <TimeOfDay>[], 'expected': isNotNull},
+        {'value': <int>[], 'expected': isNotNull},
         {
-          'value': const [TimeOfDay(hour: 8, minute: 0)],
+          'value': const [4],
           'expected': isNull,
         },
         {
-          'value': const [
-            TimeOfDay(hour: 8, minute: 0),
-            TimeOfDay(hour: 20, minute: 30),
-          ],
+          'value': const [6, 7],
           'expected': isNull,
         },
       ];
 
       // Act
-      final results = cases
-          .map((c) => requiredListOfTimes(l10n, c['value'] as List<TimeOfDay>))
-          .toList();
+      final results =
+          cases.map((c) => requiredList(c['value'] as List<int>)).toList();
       final expected = cases.map((c) => c['expected'] as Matcher).toList();
 
       // Assert

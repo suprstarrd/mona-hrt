@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Eva Tatarka "evant" <eva@tatarka.me>
+//
+// SPDX-License-Identifier: AGPL-3.0-only
+
 import 'package:decimal/decimal.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mona/data/model/units.dart';
@@ -37,6 +41,20 @@ void main() {
       final converted = value.inUnit(TestosteroneUnit.nmol_L);
 
       expect(converted, Decimal.parse('8.66'));
+    });
+
+    test('testosterone converts from nmol/L to ng/mL', () {
+      final value = UnitValue(8.toDecimal(), TestosteroneUnit.nmol_L);
+      final converted = value.inUnit(TestosteroneUnit.ng_mL);
+
+      expect(converted, Decimal.parse('2.3072'));
+    });
+
+    test('testosterone converts from ng/dL to ng/mL', () {
+      final value = UnitValue(8.toDecimal(), TestosteroneUnit.ng_dL);
+      final converted = value.inUnit(TestosteroneUnit.ng_mL);
+
+      expect(converted, Decimal.parse('0.08'));
     });
 
     test('testosterone converts from nmol/L to ng/dL', () {

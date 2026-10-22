@@ -1,4 +1,13 @@
+// SPDX-FileCopyrightText: 2026 Eva Tatarka "evant" <eva@tatarka.me>
+// SPDX-FileCopyrightText: 2026 Délia Cheminot <delia@cheminot.net>
+//
+// SPDX-License-Identifier: AGPL-3.0-only
+
+import 'package:dart_mappable/dart_mappable.dart';
 import 'package:decimal/decimal.dart';
+import 'package:mona/data/model/custom_mappers.dart';
+
+part 'units.mapper.dart';
 
 abstract interface class Unit<T> implements Enum {
   final String name;
@@ -8,9 +17,12 @@ abstract interface class Unit<T> implements Enum {
   Decimal convert(Decimal value, T into);
 }
 
+@MappableEnum()
 enum EstradiolUnit implements Unit<EstradiolUnit> {
+  @MappableValue("pg/mL")
   // ignore: constant_identifier_names
   pg_mL("pg/mL"),
+  @MappableValue("pmol/L")
   // ignore: constant_identifier_names
   pmol_L("pmol/L");
 
@@ -35,19 +47,17 @@ enum EstradiolUnit implements Unit<EstradiolUnit> {
   String toString() {
     return name;
   }
-
-  factory EstradiolUnit.parse(String value) {
-    try {
-      return EstradiolUnit.values.firstWhere((unit) => unit.name == value);
-    } on StateError {
-      throw ArgumentError("failed to parse $value");
-    }
-  }
 }
 
+@MappableEnum()
 enum TestosteroneUnit implements Unit<TestosteroneUnit> {
+  @MappableValue("ng/dL")
   // ignore: constant_identifier_names
   ng_dL("ng/dL"),
+  @MappableValue("ng/mL")
+  // ignore: constant_identifier_names
+  ng_mL("ng/mL"),
+  @MappableValue("nmol/L")
   // ignore: constant_identifier_names
   nmol_L("nmol/L");
 
@@ -56,24 +66,18 @@ enum TestosteroneUnit implements Unit<TestosteroneUnit> {
 
   const TestosteroneUnit(this.name);
 
-  factory TestosteroneUnit.parse(String value) {
-    try {
-      return TestosteroneUnit.values.firstWhere((unit) => unit.name == value);
-    } on StateError {
-      throw ArgumentError("failed to parse $value");
-    }
-  }
-
-  static Decimal _factor = Decimal.parse('28.84');
+  static final Map<TestosteroneUnit, Decimal> _toNgDL = {
+    TestosteroneUnit.ng_dL: Decimal.one,
+    TestosteroneUnit.ng_mL: Decimal.fromInt(100),
+    TestosteroneUnit.nmol_L: Decimal.parse("28.84"),
+  };
 
   @override
   Decimal convert(Decimal value, TestosteroneUnit into) {
-    if (into == this) return value;
-    return switch (into) {
-      TestosteroneUnit.ng_dL => value * _factor,
-      TestosteroneUnit.nmol_L =>
-        (value / _factor).toDecimal(scaleOnInfinitePrecision: 2)
-    };
+    if (this == into) return value;
+    final valueInNgDL = value * _toNgDL[this]!;
+    return (valueInNgDL / _toNgDL[into]!)
+        .toDecimal(scaleOnInfinitePrecision: 2);
   }
 
   @override
@@ -82,10 +86,14 @@ enum TestosteroneUnit implements Unit<TestosteroneUnit> {
   }
 }
 
+@Deprecated("directly use EstradiolUnit and TestosteroneUnit instead")
 enum Units {
   // ignore: constant_identifier_names
   pg_mL_ng_dL(
       estradiol: EstradiolUnit.pg_mL, testosterone: TestosteroneUnit.ng_dL),
+  // ignore: constant_identifier_names
+  pg_mL_ng_mL(
+      estradiol: EstradiolUnit.pg_mL, testosterone: TestosteroneUnit.ng_mL),
   // ignore: constant_identifier_names
   pmol_L_nmol_L(
       estradiol: EstradiolUnit.pmol_L, testosterone: TestosteroneUnit.nmol_L);
@@ -105,7 +113,8 @@ enum Units {
   }
 }
 
-class UnitValue<U extends Unit> {
+@MappableClass(includeCustomMappers: [DecimalStringMapper()])
+class UnitValue<U extends Unit> with UnitValueMappable<U> {
   final Decimal value;
   final U unit;
 

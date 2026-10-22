@@ -1,0 +1,43 @@
+// SPDX-FileCopyrightText: 2026 Délia Cheminot <delia@cheminot.net>
+//
+// SPDX-License-Identifier: AGPL-3.0-only
+
+import 'package:flutter/material.dart';
+import 'package:mona/data/model/medication_schedule.dart';
+
+@immutable
+sealed class PlannedNotification {
+  final MedicationSchedule schedule;
+
+  const PlannedNotification(this.schedule);
+
+  DateTime get firstFire;
+}
+
+class PlannedOccurrence extends PlannedNotification {
+  final DateTime dateTime;
+
+  const PlannedOccurrence(super.schedule, {required this.dateTime});
+
+  @override
+  DateTime get firstFire => dateTime;
+}
+
+enum Periodicity { daily, weekly }
+
+class PlannedRepeating extends PlannedNotification {
+  final Periodicity periodicity;
+  @override
+  final DateTime firstFire;
+  final int? dayOfWeek;
+
+  const PlannedRepeating(
+    super.schedule, {
+    required this.periodicity,
+    required this.firstFire,
+    this.dayOfWeek,
+  }) : assert(
+          (periodicity == Periodicity.weekly) == (dayOfWeek != null),
+          'dayOfWeek must be set iff periodicity == weekly',
+        );
+}

@@ -1,6 +1,13 @@
+// SPDX-FileCopyrightText: 2026 Délia Cheminot <delia@cheminot.net>
+// SPDX-FileContributor: Thomas "Seremptos"
+// SPDX-FileContributor: Sienna "suprstarrd" M. <business@suprstarrd.com>
+//
+// SPDX-License-Identifier: AGPL-3.0-only
+
 plugins {
     id "com.android.application"
     id "org.jetbrains.kotlin.android"
+    id "org.jetbrains.kotlin.plugin.compose"
     id "dev.flutter.flutter-gradle-plugin"
 }
 
@@ -57,12 +64,24 @@ android {
         jvmTarget = "17"
     }
 
+    buildFeatures {
+        compose true
+    }
+
+    // Patrol E2E: required for `clearPackageData` between Dart tests.
+    testOptions {
+        execution "ANDROIDX_TEST_ORCHESTRATOR"
+    }
+
     defaultConfig {
         applicationId = "com.deliacheminot.mona"
         minSdkVersion flutter.minSdkVersion
         targetSdkVersion flutter.targetSdkVersion
         versionCode = flutterVersionCode.toInteger()
         versionName = flutterVersionName
+        // Patrol E2E: run instrumented Dart tests via the Patrol JUnit runner.
+        testInstrumentationRunner "pl.leancode.patrol.PatrolJUnitRunner"
+        testInstrumentationRunnerArguments clearPackageData: "true"
         // Empty list disables generating density-specific PNGs from vector
         // drawables at build time (nondeterministic across machines).
         vectorDrawables.generatedDensities = []
@@ -113,6 +132,13 @@ android {
             resValue 'string', 'app_name', '"Mona"'
         }
     }
+
+    bundle {
+        language {
+            // avoids stripping locales the device is not set to
+            enableSplit = false
+        }
+    }
 }
 
 flutter {
@@ -121,4 +147,8 @@ flutter {
 
 dependencies {
     coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.1.4")
+    // Patrol E2E: test orchestrator enables clearPackageData between tests.
+    androidTestUtil("androidx.test:orchestrator:1.5.1")
+    implementation "androidx.glance:glance-appwidget:1.1.1"
+    testImplementation "junit:junit:4.13.2"
 }
