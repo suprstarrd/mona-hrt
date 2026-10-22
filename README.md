@@ -16,7 +16,7 @@ SPDX-License-Identifier: AGPL-3.0-only
 </p>
 
 <p align="center">
-    Track your hormones. Manage your meds. All private, open, and free. Don't merge this into the other branch!
+    Track your hormones. Manage your meds. All private, open, and free. <i>Don't merge this into the other branch!</i>
 </p>
 
 <p align="center">
